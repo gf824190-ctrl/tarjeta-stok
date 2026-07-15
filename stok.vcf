@@ -1,0 +1,11 @@
+BEGIN:VCARD
+VERSION:3.0
+FN;CHARSET=UTF-8:Stok
+N;CHARSET=UTF-8:;Stok;;;
+ORG;CHARSET=UTF-8:Stok
+TITLE;CHARSET=UTF-8:Soluciones de trazabilidad de materiales
+EMAIL;TYPE=INTERNET,WORK:empresastaller2026@gmail.com
+URL;TYPE=WORK:https://www.stokchile.cl/
+ADR;TYPE=WORK;CHARSET=UTF-8:;;;Concepción;;;Chile
+NOTE;CHARSET=UTF-8:Soluciones para mejorar la trazabilidad de materiales en obras mediante tecnología RFID e inteligencia artificial.
+END:VCARD
