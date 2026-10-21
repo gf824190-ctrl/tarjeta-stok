@@ -1,0 +1,2956 @@
+{
+  "name": "STOK · Suite automatizada v3 (lector autenticado) (+ push app)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## AGENTE 1 · CAPTURA (RC522 + NTAG215)\nEl ESP32 hace POST a `/webhook/stok/lectura-rfid`.\nValida el UID (8–20 hex: NTAG215 = 14), busca el material en la pestaña\n**Inventario**, aplica ±1, escribe el stock, registra el movimiento y\nresponde al lector. Si el stock queda bajo mínimo, dispara al Agente 3.\nTambién deja latido en la pestaña Estado para el dashboard.",
+        "height": 240,
+        "width": 470
+      },
+      "id": "8962fc3d-4f84-444b-b9ff-266638d70a2e",
+      "name": "Nota A1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "stok/lectura-rfid",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "6ab23887-e615-422d-af0b-392113904e7c",
+      "name": "A1 · Webhook lectura RFID",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        640
+      ],
+      "webhookId": "stok-lectura-rfid"
+    },
+    {
+      "parameters": {
+        "jsCode": "// CORRECCIÓN: NTAG215 entrega UID de 7 bytes = 14 hex. La regla antigua (16–32)\n// los descartaba en silencio. Aceptamos 8–20 hex y los campos uid o epc.\nconst body = $input.first().json.body || $input.first().json;\nconst vistos = new Set(); const eventos = [];\nfor (const l of (body.lecturas || [])) {\n  const uid = String(l.uid || l.epc || '').trim().toUpperCase().replace(/[\\s:-]/g,'');\n  if (!/^[0-9A-F]{8,20}$/.test(uid)) continue;\n  if (vistos.has(uid)) continue;\n  vistos.add(uid);\n  eventos.push({ uid, obra_id: body.obra_id || 'OBRA-001', lector_id: body.lector_id || 'LECTOR-1',\n    zona: body.zona || 'bodega', direccion: (body.direccion === 'salida') ? 'salida' : 'entrada',\n    rssi: l.rssi ?? null, ts: l.ts || new Date().toISOString() });\n}\nif (!eventos.length) return [{ json: { sin_lecturas_validas: true } }];\nreturn eventos.map(e => ({ json: e }));"
+      },
+      "id": "225f7cd2-9063-495a-b5bf-ab57179c9613",
+      "name": "A1 · Validar UID (NTAG215)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 215755798,
+          "mode": "list",
+          "cachedResultName": "Inventario",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=215755798"
+        },
+        "options": {}
+      },
+      "id": "484c57b2-470a-4580-80ec-df39f14f0515",
+      "name": "A1 · Leer inventario",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        176,
+        640
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const ev = $('A1 · Verificar credencial del lector').first().json;\nconst num = v => { const n = parseFloat(String(v ?? '').replace(',','.')); return isNaN(n)?0:n; };\nconst limpio = s => String(s ?? '').trim().toUpperCase().replace(/[\\s:-]/g,'');\nconst mat = $input.all().map(i=>i.json).find(m => limpio(m.uid_tag) === ev.uid);\nif (!mat || !mat.material_id)\n  return [{ json: { valido:false, respuesta:{ ok:false, error:'uid_desconocido', uid:ev.uid } } }];\nconst previo = num(mat.stock);\nconst delta = ev.direccion === 'salida' ? -1 : 1;\nconst nuevo = Math.max(0, previo + delta);\nconst minimo = num(mat.minimo);\nconst critico = minimo > 0 && nuevo < minimo;\nconst severidad = critico ? 'critica' : (minimo>0 && nuevo < minimo*1.25 ? 'advertencia' : 'ok');\nreturn [{ json: {\n  valido:true, critico, material_id:mat.material_id, nombre:mat.nombre, stock:nuevo,\n  mov_id:'MOV-'+Date.now()+'-'+Math.floor(Math.random()*1000),\n  ts:ev.ts, uid_tag:ev.uid, direccion:ev.direccion, delta, stock_resultante:nuevo,\n  lector_id:ev.lector_id, obra_id:ev.obra_id,\n  respuesta:{ ok:true, uid:ev.uid, nombre:mat.nombre, direccion:ev.direccion, stock:nuevo, minimo, severidad }\n} }];"
+      },
+      "id": "edf86b2a-ecf6-4aad-8d73-84777e78080f",
+      "name": "A1 · Procesar movimiento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.valido }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "727fe646-2e9e-4249-9b97-70877277d8d4",
+      "name": "A1 · ¿Lectura válida?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        656,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 215755798,
+          "mode": "list",
+          "cachedResultName": "Inventario",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=215755798"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "material_id": "={{ $json.material_id }}",
+            "stock": "={{ $json.stock }}"
+          },
+          "matchingColumns": [
+            "material_id"
+          ],
+          "schema": [
+            {
+              "id": "material_id",
+              "displayName": "material_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "uid_tag",
+              "displayName": "uid_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "zona",
+              "displayName": "zona",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "unidad",
+              "displayName": "unidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "stock",
+              "displayName": "stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "minimo",
+              "displayName": "minimo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "maximo",
+              "displayName": "maximo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "proveedor",
+              "displayName": "proveedor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "precio_ref",
+              "displayName": "precio_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d3801223-b611-42c5-accf-ef58e3dbc94f",
+      "name": "A1 · Actualizar stock",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        896,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2108133530,
+          "mode": "list",
+          "cachedResultName": "Movimientos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=2108133530"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "mov_id": "={{ $('A1 · Procesar movimiento').item.json.mov_id }}",
+            "ts": "={{ $('A1 · Procesar movimiento').item.json.ts }}",
+            "uid_tag": "={{ $('A1 · Procesar movimiento').item.json.uid_tag }}",
+            "material_id": "={{ $('A1 · Procesar movimiento').item.json.material_id }}",
+            "nombre": "={{ $('A1 · Procesar movimiento').item.json.nombre }}",
+            "direccion": "={{ $('A1 · Procesar movimiento').item.json.direccion }}",
+            "delta": "={{ $('A1 · Procesar movimiento').item.json.delta }}",
+            "stock_resultante": "={{ $('A1 · Procesar movimiento').item.json.stock_resultante }}",
+            "lector_id": "={{ $('A1 · Procesar movimiento').item.json.lector_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "mov_id",
+              "displayName": "mov_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ts",
+              "displayName": "ts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "uid_tag",
+              "displayName": "uid_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "material_id",
+              "displayName": "material_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "direccion",
+              "displayName": "direccion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delta",
+              "displayName": "delta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stock_resultante",
+              "displayName": "stock_resultante",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lector_id",
+              "displayName": "lector_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "189d7bd2-9ecc-4672-b853-f1cea5cd6211",
+      "name": "A1 · Registrar movimiento",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1136,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $('A1 · Procesar movimiento').item.json.respuesta }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "0278b9bd-1082-4f2a-b87f-2c61a9dcd077",
+      "name": "A1 · Responder al lector",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1376,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.respuesta }}",
+        "options": {}
+      },
+      "id": "23851412-712c-4ea3-81c0-e05a3fbd4ad0",
+      "name": "A1 · Responder (UID inválido)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('A1 · Procesar movimiento').item.json.critico }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "09174766-54b4-4b28-b495-ed136606bd9e",
+      "name": "A1 · ¿Stock crítico?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.stokchile.store/webhook/stok/agente/accion",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"obra_id\": $('A1 · Procesar movimiento').item.json.obra_id, \"disparador\": \"captura\", \"material_id\": $('A1 · Procesar movimiento').item.json.material_id } }}",
+        "options": {}
+      },
+      "id": "840f78d0-4aed-488e-8528-9028c1e95338",
+      "name": "A1 · Despertar Agente de Acción",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1856,
+        528
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## AGENTE 2 · PREDICCIÓN\nSe ejecuta a las 06:00 y cuando el dashboard pide «Recalcular».\nLee la **carpeta de Drive con la programación de obra** (Gantt, carta\nGantt en xlsx/csv/pdf), la cruza con el consumo real de la pestaña\nMovimientos y el stock actual, y proyecta **días para quiebre** por\nmaterial. Escribe la pestaña Predicciones. Si hay urgencia alta,\ndespierta al Agente de Acción.",
+        "height": 270,
+        "width": 470
+      },
+      "id": "8e8421a7-2662-47bb-9e78-a1856f7d03b3",
+      "name": "Nota A2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "7643211e-7f59-430d-948b-5c4ad9f2a7a1",
+      "name": "A2 · Todos los días 06:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        1584
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "stok/agente/prediccion",
+        "responseMode": "lastNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "6549e773-55f3-43a1-93f6-9f66a460dce3",
+      "name": "A2 · Webhook recalcular",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        1744
+      ],
+      "webhookId": "stok-agente-prediccion"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "name contains 'Gantt' and trashed = false",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1zmod3xuGpZse3IL4SFrfZy5kxsLQ4T6W",
+            "mode": "id"
+          }
+        },
+        "options": {}
+      },
+      "id": "98f9e8ca-a27b-4293-8aaa-632a777898d7",
+      "name": "A2 · Buscar programación (Drive)",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -64,
+        1664
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Toma el archivo más recientemente modificado de la carpeta de programación.\nconst archivos = $input.all().map(i => i.json).filter(a => a.id);\nif (!archivos.length) return [{ json: { sin_programacion: true } }];\narchivos.sort((a,b) => new Date(b.modifiedTime||0) - new Date(a.modifiedTime||0));\nconst a = archivos[0];\nreturn [{ json: { file_id: a.id, file_name: a.name, mimeType: a.mimeType, modifiedTime: a.modifiedTime } }];"
+      },
+      "id": "39efbf6d-889a-4ea7-a8d6-5ac4fbd63ca9",
+      "name": "A2 · Elegir archivo más reciente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        1664
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.file_id }}",
+          "mode": "id"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "text/plain"
+            }
+          }
+        }
+      },
+      "id": "98c99cba-95f7-4538-8647-6a49eb9ce674",
+      "name": "A2 · Descargar programación",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        384,
+        1664
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "955f74e8-c357-4c73-a7c3-f1b637294907",
+      "name": "A2 · Leer programación (CSV)",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        592,
+        1664
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 215755798,
+          "mode": "list",
+          "cachedResultName": "Inventario",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=215755798"
+        },
+        "options": {}
+      },
+      "id": "135481bd-1153-4e9c-9cac-f0358e4f48c2",
+      "name": "A2 · Leer inventario",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        384,
+        1840
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2108133530,
+          "mode": "list",
+          "cachedResultName": "Movimientos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=2108133530"
+        },
+        "options": {}
+      },
+      "id": "6023570c-18f7-4150-af52-501459af8be9",
+      "name": "A2 · Leer movimientos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        384,
+        2016
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Reúne: programación de obra (Drive) + stock (Inventario) + consumo real (Movimientos).\nconst num = v => { const n = parseFloat(String(v ?? '').replace(',','.')); return isNaN(n)?0:n; };\nconst hoy = new Date();\nconst iso = d => d.toISOString().slice(0,10);\n\nlet programacion = [];\ntry { programacion = $('A2 · Leer programación (CSV)').all().map(i=>i.json).filter(r=>Object.keys(r).length); } catch(e) {}\nlet archivo = 'sin archivo';\ntry { archivo = $('A2 · Elegir archivo más reciente').first().json.file_name || 'sin archivo'; } catch(e) {}\n\nconst inventario = $('A2 · Leer inventario').all().map(i=>i.json).filter(m=>m.material_id);\nconst movimientos = $('A2 · Leer movimientos').all().map(i=>i.json).filter(m=>m.material_id);\n\nconst desde = new Date(hoy.getTime() - 14*864e5);\nconst consumo = {};\nfor (const m of movimientos) {\n  const t = new Date(m.ts);\n  if (isNaN(t) || t < desde) continue;\n  const d = num(m.delta);\n  if (d < 0) consumo[m.material_id] = (consumo[m.material_id] || 0) + Math.abs(d);\n}\n\nconst materiales = inventario.map(m => {\n  const total14 = consumo[m.material_id] || 0;\n  const diario = +(total14 / 14).toFixed(3);\n  const stock = num(m.stock);\n  const dias = diario > 0 ? Math.floor(stock / diario) : null;\n  return { material_id:m.material_id, nombre:m.nombre, categoria:m.categoria, unidad:m.unidad,\n    stock, minimo:num(m.minimo), maximo:num(m.maximo), proveedor:m.proveedor,\n    consumo_14d: total14, consumo_diario: diario,\n    dias_para_quiebre_lineal: dias,\n    fecha_quiebre_lineal: dias === null ? null : iso(new Date(hoy.getTime() + dias*864e5)) };\n});\n\nreturn [{ json: { fecha: iso(hoy), obra_id: 'OBRA-001', archivo_programacion: archivo,\n  programacion: programacion.slice(0, 60), materiales } }];"
+      },
+      "id": "cbfecea8-8d09-419b-a367-251a43a41972",
+      "name": "A2 · Consolidar contexto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        1744
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Proyecta los quiebres de stock. Responde SOLO el array JSON pedido.\n\nFECHA: {{ $json.fecha }}\nOBRA: {{ $json.obra_id }}\nARCHIVO DE PROGRAMACIÓN LEÍDO DESDE DRIVE: {{ $json.archivo_programacion }}\n\nPROGRAMACIÓN DE OBRA:\n{{ JSON.stringify($json.programacion, null, 2) }}\n\nMATERIALES (stock + consumo real RFID):\n{{ JSON.stringify($json.materiales, null, 2) }}",
+        "options": {
+          "systemMessage": "Eres el Agente de Predicción de STOK, sistema de control de bodega en obras de construcción (Chile).\n\nRecibes: (a) la programación de obra leída desde Drive (partidas, fechas, cantidades), (b) el stock actual de cada material y (c) el consumo real de los últimos 14 días capturado por RFID.\n\nTu tarea: proyectar para cada material cuándo se quiebra el stock, corrigiendo la proyección lineal con lo que dice la programación. Si una partida próxima consume intensivamente un material, el quiebre se adelanta respecto del cálculo lineal; si la partida ya terminó, se atrasa.\n\nResponde SOLO un array JSON válido, sin markdown ni texto adicional. Un objeto por material con riesgo real (omite los que no tengan consumo ni partida asociada):\n[{\"material_id\":\"MAT-01\",\"nombre\":\"...\",\"consumo_diario\":0.5,\"dias_para_quiebre\":6,\"fecha_quiebre\":\"2026-07-16\",\"urgencia\":\"alta|media|baja\",\"partida_afectada\":\"nombre de la partida del programa, o 'sin partida asociada'\",\"razonamiento\":\"una frase, máximo 20 palabras\"}]\n\nCriterio de urgencia: alta = quiebra en 7 días o menos, o ya está bajo el mínimo; media = 8 a 14 días; baja = más de 14 días. Sé conservador: en obra, quedarse sin material detiene la partida."
+        }
+      },
+      "id": "b52c7146-e002-4c06-808c-67b2d52efb3c",
+      "name": "A2 · Agente IA - Predicción",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        1744
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parsea el array de la IA. Si falla, usa la proyección lineal como respaldo:\n// la demo nunca se queda sin predicciones.\nconst ctx = $('A2 · Consolidar contexto').first().json;\nlet preds = null;\ntry {\n  const bruto = String($input.first().json.output ?? $input.first().json.text ?? '').replace(/```json|```/g,'').trim();\n  const arr = JSON.parse(bruto.slice(bruto.indexOf('['), bruto.lastIndexOf(']')+1));\n  if (Array.isArray(arr) && arr.length) preds = arr;\n} catch(e) {}\n\nif (!preds) {\n  preds = ctx.materiales\n    .filter(m => m.consumo_diario > 0 || m.stock < m.minimo)\n    .map(m => {\n      const d = m.dias_para_quiebre_lineal ?? 0;\n      return { material_id:m.material_id, nombre:m.nombre, consumo_diario:m.consumo_diario,\n        dias_para_quiebre:d, fecha_quiebre:m.fecha_quiebre_lineal,\n        urgencia: (m.stock < m.minimo || d <= 7) ? 'alta' : (d <= 14 ? 'media' : 'baja'),\n        partida_afectada:'sin partida asociada',\n        razonamiento:'Proyección lineal sobre consumo RFID de los últimos 14 días.' };\n    });\n}\n\nconst stock = Object.fromEntries(ctx.materiales.map(m => [m.material_id, m.stock]));\nconst filas = preds.map(p => ({\n  prediccion_id: p.material_id + '-' + ctx.fecha,\n  fecha: ctx.fecha,\n  material_id: p.material_id,\n  nombre: p.nombre,\n  stock: stock[p.material_id] ?? 0,\n  consumo_diario: p.consumo_diario ?? 0,\n  dias_para_quiebre: p.dias_para_quiebre ?? 0,\n  fecha_quiebre: p.fecha_quiebre ?? '',\n  urgencia: p.urgencia ?? 'media',\n  partida_afectada: p.partida_afectada ?? 'sin partida asociada',\n  razonamiento: p.razonamiento ?? ''\n}));\nreturn filas.map(f => ({ json: f }));"
+      },
+      "id": "2e952388-53c4-4cc8-8898-2428992008a8",
+      "name": "A2 · Parsear predicciones",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        1744
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 715534301,
+          "mode": "list",
+          "cachedResultName": "Predicciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=715534301"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "prediccion_id": "={{ $json.prediccion_id }}",
+            "fecha": "={{ $json.fecha }}",
+            "material_id": "={{ $json.material_id }}",
+            "nombre": "={{ $json.nombre }}",
+            "stock": "={{ $json.stock }}",
+            "consumo_diario": "={{ $json.consumo_diario }}",
+            "dias_para_quiebre": "={{ $json.dias_para_quiebre }}",
+            "fecha_quiebre": "={{ $json.fecha_quiebre }}",
+            "urgencia": "={{ $json.urgencia }}",
+            "partida_afectada": "={{ $json.partida_afectada }}",
+            "razonamiento": "={{ $json.razonamiento }}"
+          },
+          "matchingColumns": [
+            "prediccion_id"
+          ],
+          "schema": [
+            {
+              "id": "prediccion_id",
+              "displayName": "prediccion_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "material_id",
+              "displayName": "material_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "stock",
+              "displayName": "stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "consumo_diario",
+              "displayName": "consumo_diario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "dias_para_quiebre",
+              "displayName": "dias_para_quiebre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_quiebre",
+              "displayName": "fecha_quiebre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "urgencia",
+              "displayName": "urgencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "partida_afectada",
+              "displayName": "partida_afectada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "razonamiento",
+              "displayName": "razonamiento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "0164fd52-405f-42d3-8fc7-e76adba28816",
+      "name": "A2 · Guardar predicciones",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1552,
+        1744
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.urgencia === 'alta' }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c00f827f-6505-4300-8b9c-ba913fcfe06e",
+      "name": "A2 · ¿Urgencia alta?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1792,
+        1744
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.stokchile.store/webhook/stok/agente/accion",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"obra_id\": \"OBRA-001\", \"disparador\": \"prediccion\", \"material_id\": $json.material_id } }}",
+        "options": {}
+      },
+      "id": "9e0cd73a-4a85-477f-a5a9-966b3c17db72",
+      "name": "A2 · Despertar Agente de Acción",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2032,
+        1664
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## AGENTE 3 · ACCIÓN\nLo despiertan el Agente 1 (stock crítico) o el Agente 2 (quiebre próximo);\ntambién el botón «Revisar compras» del dashboard.\nLee Inventario + Predicciones + Alertas, decide qué comprar (cantidad,\nproveedor, costo), **envía el correo de alerta** y escribe las pestañas\nRecomendaciones y Alertas — que el dashboard muestra en pantalla.\nDedupe diario: no repite correo por el mismo material el mismo día.",
+        "height": 280,
+        "width": 470
+      },
+      "id": "eb0c7b9b-8f07-45cc-b6f1-27d69019c527",
+      "name": "Nota A3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        2368
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "stok/agente/accion",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "b37f2f42-37f2-4a78-beb0-4a70536f8783",
+      "name": "A3 · Webhook acción",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        2704
+      ],
+      "webhookId": "stok-agente-accion"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 215755798,
+          "mode": "list",
+          "cachedResultName": "Inventario",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=215755798"
+        },
+        "options": {}
+      },
+      "id": "72268d2e-7527-46b5-af90-9f685105701a",
+      "name": "A3 · Leer inventario",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -64,
+        2704
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 715534301,
+          "mode": "list",
+          "cachedResultName": "Predicciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=715534301"
+        },
+        "options": {}
+      },
+      "id": "9ea1cff5-2a80-4f19-acba-8ec9ba533a6a",
+      "name": "A3 · Leer predicciones",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        176,
+        2704
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 607447655,
+          "mode": "list",
+          "cachedResultName": "Alertas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=607447655"
+        },
+        "options": {}
+      },
+      "id": "a3edd4e7-fbdf-4621-8b79-78976ad7c446",
+      "name": "A3 · Leer alertas",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        416,
+        2704
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Materiales que requieren acción hoy y aún no fueron avisados.\nconst num = v => { const n = parseFloat(String(v ?? '').replace(',','.')); return isNaN(n)?0:n; };\nconst hoy = new Date().toISOString().slice(0,10);\nconst inv = $('A3 · Leer inventario').all().map(i=>i.json).filter(m=>m.material_id);\nconst preds = $('A3 · Leer predicciones').all().map(i=>i.json).filter(p=>p.material_id && String(p.fecha)===hoy);\nconst alertas = $input.all().map(i=>i.json).filter(a=>a.alerta_id);\nconst cuerpo = $('A3 · Webhook acción').first().json.body || {};\n\nconst yaAvisado = new Set(alertas.filter(a => String(a.fecha)===hoy &&\n  String(a.correo_enviado).toLowerCase()==='si').map(a => String(a.material_id)));\nconst predPorMat = Object.fromEntries(preds.map(p => [p.material_id, p]));\n\nconst objetivo = inv.filter(m => {\n  const bajoMinimo = num(m.minimo) > 0 && num(m.stock) < num(m.minimo);\n  const p = predPorMat[m.material_id];\n  const quiebreProximo = p && String(p.urgencia).toLowerCase() === 'alta';\n  return bajoMinimo || quiebreProximo;\n}).filter(m => !yaAvisado.has(String(m.material_id)));\n\nif (!objetivo.length) return [{ json: { hay_accion: false, fecha: hoy, mensaje: 'Sin materiales nuevos que accionar hoy.' } }];\n\nconst items = objetivo.map(m => {\n  const p = predPorMat[m.material_id] || {};\n  const cantidad = Math.max(1, num(m.maximo) - num(m.stock));\n  return { material_id:m.material_id, nombre:m.nombre, categoria:m.categoria, unidad:m.unidad || 'un',\n    stock:num(m.stock), minimo:num(m.minimo), maximo:num(m.maximo),\n    proveedor:m.proveedor || 'sin proveedor declarado',\n    precio_ref:num(m.precio_ref), cantidad_sugerida:cantidad, costo_estimado:cantidad*num(m.precio_ref),\n    bajo_minimo: num(m.minimo)>0 && num(m.stock)<num(m.minimo),\n    dias_para_quiebre: p.dias_para_quiebre ?? null, urgencia_prediccion: p.urgencia ?? null,\n    partida_afectada: p.partida_afectada ?? 'sin partida asociada' };\n});\nreturn [{ json: { hay_accion:true, fecha:hoy, obra_id: cuerpo.obra_id || 'OBRA-001',\n  disparador: cuerpo.disparador || 'manual', items } }];"
+      },
+      "id": "b6be412a-4983-436e-b3af-737b228b47e3",
+      "name": "A3 · Detectar qué accionar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        2704
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.hay_accion }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "id": "872db2cb-ac23-4f39-9a04-938002c593aa"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ef0446e9-747f-4170-9a15-e7ebcd9f0fb9",
+      "name": "A3 · ¿Hay que accionar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        2704
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Genera el correo, la alerta de pantalla y las recomendaciones de compra. Responde SOLO el JSON pedido.\n\nOBRA: {{ $json.obra_id }}\nFECHA: {{ $json.fecha }}\nDISPARADOR: {{ $json.disparador }}\n\nMATERIALES A ACCIONAR:\n{{ JSON.stringify($json.items, null, 2) }}",
+        "options": {
+          "systemMessage": "Eres el Agente de Acción de STOK, sistema RFID de control de bodega en obras de construcción (Chile). Recomiendas compras y avisas al jefe de obra y a adquisiciones.\n\nResponde SOLO un JSON válido, sin markdown:\n{\"asunto\":\"...\",\"cuerpo_html\":\"...\",\"mensaje_pantalla\":\"...\",\"recomendaciones\":[{\"material_id\":\"MAT-01\",\"cantidad_sugerida\":9,\"motivo\":\"...\",\"prioridad\":\"alta|media|baja\"}]}\n\nReglas:\n1. asunto: corto y accionable, con la obra y cuántos materiales requieren compra.\n2. cuerpo_html: HTML simple sin CSS externo. Saludo breve; párrafo que explique que la captura RFID y la proyección contra la programación de obra detectaron los materiales; una TABLA con Material, Stock actual, Mínimo, Días para quiebre, Cantidad sugerida, Proveedor, Costo estimado (CLP con separador de miles); y un cierre con la recomendación de emitir la orden de compra hoy. Firma \"Agente de acción STOK\".\n3. mensaje_pantalla: una sola frase, máximo 15 palabras, para mostrar como alerta en el dashboard.\n4. recomendaciones: una por material. Usa la cantidad_sugerida que viene en los datos, no inventes cifras. motivo: una frase que combine el stock, los días para quiebre y la partida afectada. prioridad alta si está bajo el mínimo o quiebra en 7 días o menos.\n5. Tono profesional y directo, español de Chile."
+        }
+      },
+      "id": "aed57c08-27d3-47ce-8bc4-02e5af1c5993",
+      "name": "A3 · Agente IA - Acción",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        2704
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrae el JSON de la IA. Respaldo determinístico si falla: la demo no se cae.\nconst d = $('A3 · Detectar qué accionar').first().json;\nconst clp = n => '$' + Math.round(n).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g,'.');\nlet j = null;\ntry {\n  const b = String($input.first().json.output ?? $input.first().json.text ?? '').replace(/```json|```/g,'').trim();\n  j = JSON.parse(b.slice(b.indexOf('{'), b.lastIndexOf('}')+1));\n} catch(e) {}\n\nif (!j || !j.asunto || !j.cuerpo_html) {\n  const filas = d.items.map(c => `<tr><td>${c.nombre}</td><td align=\"center\">${c.stock} ${c.unidad}</td><td align=\"center\">${c.minimo}</td><td align=\"center\">${c.dias_para_quiebre ?? '—'}</td><td align=\"center\"><b>${c.cantidad_sugerida} ${c.unidad}</b></td><td>${c.proveedor}</td><td align=\"right\">${clp(c.costo_estimado)}</td></tr>`).join('');\n  j = {\n    asunto: `STOK · ${d.obra_id}: ${d.items.length} material(es) requieren compra`,\n    cuerpo_html: `<p>Estimado equipo,</p><p>La captura RFID y la proyección contra la programación de obra detectaron los siguientes materiales en riesgo en ${d.obra_id} (${d.fecha}):</p><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse:collapse;font-family:Arial;font-size:13px\"><tr style=\"background:#0F1B3D;color:#fff\"><th>Material</th><th>Stock</th><th>Mínimo</th><th>Días para quiebre</th><th>Cantidad sugerida</th><th>Proveedor</th><th>Costo estimado</th></tr>${filas}</table><p><b>Recomendación:</b> emitir la orden de compra hoy para no detener las partidas.</p><p>— Agente de acción STOK</p>`,\n    mensaje_pantalla: `${d.items.length} material(es) requieren compra inmediata.`,\n    recomendaciones: d.items.map(c => ({ material_id:c.material_id, cantidad_sugerida:c.cantidad_sugerida,\n      motivo:`Stock ${c.stock} ${c.unidad} bajo mínimo ${c.minimo}. Partida: ${c.partida_afectada}.`,\n      prioridad: (c.bajo_minimo || (c.dias_para_quiebre !== null && c.dias_para_quiebre <= 7)) ? 'alta' : 'media' }))\n  };\n}\nconst porId = Object.fromEntries(d.items.map(i => [i.material_id, i]));\nconst recs = (j.recomendaciones || []).map(r => {\n  const it = porId[r.material_id] || {};\n  const cant = Number(r.cantidad_sugerida) || it.cantidad_sugerida || 1;\n  return { rec_id: r.material_id + '-' + d.fecha, fecha: d.fecha, material_id: r.material_id,\n    nombre: it.nombre || r.material_id, cantidad_sugerida: cant, unidad: it.unidad || 'un',\n    proveedor: it.proveedor || '', costo_estimado: cant * (it.precio_ref || 0),\n    motivo: r.motivo || '', prioridad: r.prioridad || 'media', estado: 'pendiente' };\n});\nreturn [{ json: { asunto:j.asunto, cuerpo_html:j.cuerpo_html,\n  mensaje_pantalla: j.mensaje_pantalla || `${d.items.length} material(es) requieren compra.`,\n  fecha:d.fecha, obra_id:d.obra_id, items:d.items, recomendaciones:recs,\n  total_estimado: recs.reduce((s,r)=>s+r.costo_estimado,0) } }];"
+      },
+      "id": "54d56124-2d49-4e58-92f6-eec76997f7e6",
+      "name": "A3 · Parsear (con respaldo)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        2704
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "gf824190@gmail.com",
+        "toEmail": "empresastaller2026@gmail.com",
+        "subject": "={{ $json.asunto }}",
+        "html": "={{ $json.cuerpo_html }}",
+        "options": {}
+      },
+      "id": "e08e2f4e-8815-4bed-a6ba-2099ae8e2eab",
+      "name": "A3 · Enviar correo de alerta",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1616,
+        2576
+      ],
+      "webhookId": "5b80f796-790f-4500-be0c-53f37b4f17eb",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $('A3 · Parsear (con respaldo)').first().json;\nreturn d.recomendaciones.map(r => ({ json: r }));"
+      },
+      "id": "c19de5b1-1493-4235-a280-3e498f010132",
+      "name": "A3 · Filas de recomendaciones",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1616,
+        2736
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1207673948,
+          "mode": "list",
+          "cachedResultName": "Recomendaciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=1207673948"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "rec_id": "={{ $json.rec_id }}",
+            "fecha": "={{ $json.fecha }}",
+            "material_id": "={{ $json.material_id }}",
+            "nombre": "={{ $json.nombre }}",
+            "cantidad_sugerida": "={{ $json.cantidad_sugerida }}",
+            "unidad": "={{ $json.unidad }}",
+            "proveedor": "={{ $json.proveedor }}",
+            "costo_estimado": "={{ $json.costo_estimado }}",
+            "motivo": "={{ $json.motivo }}",
+            "prioridad": "={{ $json.prioridad }}",
+            "estado": "={{ $json.estado }}"
+          },
+          "matchingColumns": [
+            "rec_id"
+          ],
+          "schema": [
+            {
+              "id": "rec_id",
+              "displayName": "rec_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "material_id",
+              "displayName": "material_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cantidad_sugerida",
+              "displayName": "cantidad_sugerida",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "unidad",
+              "displayName": "unidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "proveedor",
+              "displayName": "proveedor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "costo_estimado",
+              "displayName": "costo_estimado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "motivo",
+              "displayName": "motivo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "prioridad",
+              "displayName": "prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "81fac771-9e1a-4da9-a59b-b74545b99ce0",
+      "name": "A3 · Guardar recomendaciones",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1856,
+        2736
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $('A3 · Parsear (con respaldo)').first().json;\nreturn d.items.map(c => ({ json: {\n  alerta_id: c.material_id + '-' + d.fecha, fecha: d.fecha, material_id: c.material_id, nombre: c.nombre,\n  stock: c.stock, minimo: c.minimo, cantidad_sugerida: c.cantidad_sugerida,\n  proveedor: c.proveedor, correo_enviado: 'si', mensaje: d.mensaje_pantalla } }));"
+      },
+      "id": "8a8f0965-a4b4-444e-90a1-a4ef42fb85a7",
+      "name": "A3 · Filas de alertas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1616,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 607447655,
+          "mode": "list",
+          "cachedResultName": "Alertas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=607447655"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "alerta_id": "={{ $json.alerta_id }}",
+            "fecha": "={{ $json.fecha }}",
+            "material_id": "={{ $json.material_id }}",
+            "nombre": "={{ $json.nombre }}",
+            "stock": "={{ $json.stock }}",
+            "minimo": "={{ $json.minimo }}",
+            "cantidad_sugerida": "={{ $json.cantidad_sugerida }}",
+            "proveedor": "={{ $json.proveedor }}",
+            "correo_enviado": "={{ $json.correo_enviado }}"
+          },
+          "matchingColumns": [
+            "alerta_id"
+          ],
+          "schema": [
+            {
+              "id": "alerta_id",
+              "displayName": "alerta_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "material_id",
+              "displayName": "material_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stock",
+              "displayName": "stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "minimo",
+              "displayName": "minimo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cantidad_sugerida",
+              "displayName": "cantidad_sugerida",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "proveedor",
+              "displayName": "proveedor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "correo_enviado",
+              "displayName": "correo_enviado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "313b9af8-0868-4be8-822f-58e793609be3",
+      "name": "A3 · Guardar alertas",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1856,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## API · DASHBOARD\n`GET /webhook/stok/api/dashboard` devuelve TODO lo que pinta la pantalla:\ninventario, movimientos, predicciones, recomendaciones y alertas.\nEl dashboard lo consulta cada 20 s — no se sube ninguna planilla a mano.\n`POST /webhook/stok/inventario` guarda los mínimos editados.\n`POST /webhook/stok/recomendacion` aprueba o descarta una compra.",
+        "height": 230,
+        "width": 470
+      },
+      "id": "ac31fac1-cf4b-4b3c-a585-71765a944b30",
+      "name": "Nota API",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        3376
+      ]
+    },
+    {
+      "parameters": {
+        "path": "stok/api/dashboard",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "adffa7e1-b5fb-4fd7-a880-630085eef4dd",
+      "name": "API · GET dashboard",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        3696
+      ],
+      "webhookId": "stok-api-dashboard"
+    },
+    {
+      "parameters": {
+        "jsCode": "const num = v => { const n = parseFloat(String(v ?? '').replace(',', '.')); return isNaN(n) ? 0 : n; };\nconst hoy = new Date().toISOString().slice(0, 10);\n\nconst resp = $input.first().json;\nconst ranges = resp.valueRanges || [];\n\n// Convierte un value range (array de arrays) en array de objetos usando la primera fila como headers\nconst toObjects = (vr) => {\n  if (!vr || !vr.values || !vr.values.length) return [];\n  const [headers, ...rows] = vr.values;\n  return rows.map(row => {\n    const obj = {};\n    headers.forEach((h, i) => { obj[h] = row[i] ?? ''; });\n    return obj;\n  });\n};\n\n// El orden coincide con el orden de \"ranges\" pedido en el nodo HTTP Request:\n// Inventario, Movimientos, Predicciones, Recomendaciones, Alertas, Lectores\nconst [invRaw, movRaw, predRaw, recRaw, alertRaw, lectRaw] = ranges.map(toObjects);\n\nconst materiales = (invRaw || []).filter(m => m.material_id).map(m => ({\n  material_id: m.material_id, nombre: m.nombre, categoria: m.categoria || '', zona: m.zona || 'bodega',\n  unidad: m.unidad || 'un', stock: num(m.stock), minimo: num(m.minimo), maximo: num(m.maximo),\n  proveedor: m.proveedor || '', precio_ref: num(m.precio_ref),\n  tag_registrado: /^[0-9A-F]{8,20}$/i.test(String(m.uid_tag || '').trim())\n}));\n\nconst movimientos = (movRaw || []).filter(m => m.mov_id)\n  .sort((a, b) => new Date(b.ts) - new Date(a.ts)).slice(0, 40)\n  .map(m => ({ ts: m.ts, nombre: m.nombre, direccion: m.direccion, delta: num(m.delta), stock: num(m.stock_resultante), lector: m.lector_id }));\n\nconst predicciones = (predRaw || []).filter(p => p.material_id && String(p.fecha) === hoy)\n  .map(p => ({\n    material_id: p.material_id, nombre: p.nombre, consumo_diario: num(p.consumo_diario),\n    dias_para_quiebre: num(p.dias_para_quiebre), fecha_quiebre: p.fecha_quiebre,\n    urgencia: String(p.urgencia || 'media').toLowerCase(), partida: p.partida_afectada, razonamiento: p.razonamiento\n  }))\n  .sort((a, b) => a.dias_para_quiebre - b.dias_para_quiebre);\n\nconst recomendaciones = (recRaw || []).filter(r => r.rec_id)\n  .filter(r => String(r.estado || 'pendiente').toLowerCase() !== 'descartada')\n  .map(r => ({\n    rec_id: r.rec_id, fecha: r.fecha, material_id: r.material_id, nombre: r.nombre,\n    cantidad_sugerida: num(r.cantidad_sugerida), unidad: r.unidad, proveedor: r.proveedor,\n    costo_estimado: num(r.costo_estimado), motivo: r.motivo,\n    prioridad: String(r.prioridad || 'media').toLowerCase(), estado: String(r.estado || 'pendiente').toLowerCase()\n  }))\n  .sort((a, b) => (a.prioridad === 'alta' ? 0 : 1) - (b.prioridad === 'alta' ? 0 : 1));\n\nconst alertas = (alertRaw || []).filter(a => a.alerta_id)\n  .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha))).slice(0, 20)\n  .map(a => ({\n    alerta_id: a.alerta_id, fecha: a.fecha, nombre: a.nombre, stock: num(a.stock), minimo: num(a.minimo),\n    mensaje: a.mensaje || `${a.nombre} bajo el mínimo (${num(a.stock)}/${num(a.minimo)}).`,\n    correo_enviado: String(a.correo_enviado || '').toLowerCase() === 'si', del_dia: String(a.fecha) === hoy\n  }));\n\nconst lectores = (lectRaw || []).filter(l => l.lector_id).map(l => ({\n  lector_id: l.lector_id, obra_id: l.obra_id, zona: l.zona || 'bodega',\n  activo: String(l.activo || '').trim().toLowerCase() === 'si',\n  ultimo_latido: l.ultimo_latido || null, descripcion: l.descripcion || '',\n  vinculado: !!String(l.token || '').trim()\n}));\n\nconst ultimoMov = movimientos[0] ? movimientos[0].ts : null;\nconst q = $('API · GET dashboard').first().json.query || {};\n\nreturn [{\n  json: {\n    obra_id: q.obra_id || 'OBRA-001', actualizado: new Date().toISOString(), fecha: hoy,\n    materiales, movimientos, predicciones, recomendaciones, alertas, lectores,\n    agentes: {\n      captura: { activo: !!ultimoMov, ultimo: ultimoMov, lectores: lectores.filter(l => l.activo).length },\n      prediccion: { activo: predicciones.length > 0, ultimo: predicciones.length ? hoy : null, total: predicciones.length },\n      accion: { activo: recomendaciones.length > 0, ultimo: recomendaciones[0] ? recomendaciones[0].fecha : null, pendientes: recomendaciones.filter(r => r.estado === 'pendiente').length }\n    }\n  }\n}];"
+      },
+      "id": "542d2f84-23ed-47a7-b2e5-99c4456dcfe5",
+      "name": "API · Consolidar payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        192,
+        3696
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "content-type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "a0bf1be9-375f-46ac-856a-52c2a6453827",
+      "name": "API · Responder JSON (CORS)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        432,
+        3696
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "stok/inventario",
+        "responseMode": "lastNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "a7f068e9-4310-42fb-b982-83d76c3e94b3",
+      "name": "PUB · POST mínimos",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -336,
+        3936
+      ],
+      "webhookId": "stok-inventario"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst items = Array.isArray(body.inventario) ? body.inventario : [];\nreturn items.filter(m=>m.material_id).map(m => ({ json: {\n  material_id: m.material_id, minimo: Number(m.minimo)||0, maximo: Number(m.maximo)||0,\n  proveedor: m.proveedor ?? '' } }));"
+      },
+      "id": "b88793a2-6bf6-4e05-b060-24f3ec06ccd7",
+      "name": "PUB · Mapear filas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        3936
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 215755798,
+          "mode": "list",
+          "cachedResultName": "Inventario",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=215755798"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "material_id": "={{ $json.material_id }}",
+            "minimo": "={{ $json.minimo }}",
+            "maximo": "={{ $json.maximo }}",
+            "proveedor": "={{ $json.proveedor }}"
+          },
+          "matchingColumns": [
+            "material_id"
+          ],
+          "schema": [
+            {
+              "id": "material_id",
+              "displayName": "material_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "uid_tag",
+              "displayName": "uid_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "zona",
+              "displayName": "zona",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "unidad",
+              "displayName": "unidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "stock",
+              "displayName": "stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "minimo",
+              "displayName": "minimo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "maximo",
+              "displayName": "maximo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "proveedor",
+              "displayName": "proveedor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "precio_ref",
+              "displayName": "precio_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "b4bb556f-227a-4400-b583-5e97d1e94689",
+      "name": "PUB · Actualizar inventario",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        144,
+        3936
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "stok/recomendacion",
+        "responseMode": "lastNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "aebd9e1d-05fb-442a-9c65-5e2830b87d65",
+      "name": "REC · POST estado compra",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -336,
+        4128
+      ],
+      "webhookId": "stok-recomendacion"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.first().json.body || $input.first().json;\nreturn [{ json: { rec_id: b.rec_id, estado: ['aprobada','descartada','pendiente'].includes(b.estado) ? b.estado : 'pendiente' } }];"
+      },
+      "id": "e6a706cf-24b9-4207-a982-4aa3c9588d0a",
+      "name": "REC · Mapear estado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        4128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1207673948,
+          "mode": "list",
+          "cachedResultName": "Recomendaciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=1207673948"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "rec_id": "={{ $json.rec_id }}",
+            "estado": "={{ $json.estado }}"
+          },
+          "matchingColumns": [
+            "rec_id"
+          ],
+          "schema": [
+            {
+              "id": "rec_id",
+              "displayName": "rec_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "material_id",
+              "displayName": "material_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "cantidad_sugerida",
+              "displayName": "cantidad_sugerida",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "unidad",
+              "displayName": "unidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "proveedor",
+              "displayName": "proveedor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "costo_estimado",
+              "displayName": "costo_estimado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "motivo",
+              "displayName": "motivo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "prioridad",
+              "displayName": "prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "944b58f3-69c2-40ee-8fd5-a5fc7ae5bbab",
+      "name": "REC · Actualizar recomendación",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        144,
+        4128
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 814967837,
+          "mode": "list",
+          "cachedResultName": "Lectores",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=814967837"
+        },
+        "options": {}
+      },
+      "id": "7242b6df-fde2-4922-a21e-bd2d19e315db",
+      "name": "A1 · Leer lectores",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        48,
+        640
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// CAMINO CORTO · autenticación del lector.\n// Cada ESP32 lleva un token. Se compara contra la pestaña Lectores antes de tocar el stock.\n// El obra_id NO se toma del payload: se toma de la fila del lector. Así un lector nunca\n// puede escribir en la bodega de otra obra, aunque el firmware venga mal configurado.\n// LA DIRECCIÓN (entrada/salida) TAMPOCO se toma del payload: manda la columna \"modo\"\n// de la fila del lector. Así configuras el sentido físico del portal desde la planilla,\n// sin depender de que el firmware del ESP32 lo mande bien.\nconst ev = $('A1 · Validar UID (NTAG215)').first().json;\nif (ev.sin_lecturas_validas)\n  return [{ json: { autorizado:false, respuesta:{ ok:false, error:'sin_lecturas_validas' } } }];\n\nconst req = $('A1 · Webhook lectura RFID').first().json;\nconst headers = req.headers || {};\nconst body = req.body || {};\n// El token viaja en el header Authorization: Bearer <token>, o en el cuerpo como respaldo.\nconst bruto = String(headers.authorization || headers.Authorization || body.token || '');\nconst token = bruto.replace(/^Bearer\\s+/i, '').trim();\n\nif (!token)\n  return [{ json: { autorizado:false, respuesta:{ ok:false, error:'sin_token', mensaje:'El lector no envió credencial.' } } }];\n\nconst lectores = $input.all().map(i => i.json).filter(l => l.lector_id);\nconst fila = lectores.find(l => String(l.token || '').trim() === token);\n\nif (!fila)\n  return [{ json: { autorizado:false, respuesta:{ ok:false, error:'token_invalido', mensaje:'Lector no reconocido en esta obra.' } } }];\nif (String(fila.activo || '').trim().toLowerCase() !== 'si')\n  return [{ json: { autorizado:false, respuesta:{ ok:false, error:'lector_desactivado', lector_id: fila.lector_id } } }];\n\n// La dirección la decide la planilla (columna \"modo\"). Si viene vacía o con un valor\n// no reconocido, se respeta lo que haya calculado A1 · Validar UID como respaldo.\nconst modo = String(fila.modo || '').trim().toLowerCase();\nconst direccion = (modo === 'salida' || modo === 'entrada') ? modo : ev.direccion;\n\nreturn [{ json: { ...ev, autorizado:true,\n  lector_id: fila.lector_id,\n  obra_id: fila.obra_id,               // manda la planilla, no el firmware\n  zona: fila.zona || ev.zona,\n  direccion,                           // manda la planilla (\"modo\"), no el firmware\n  ultimo_latido: new Date().toISOString() } }];"
+      },
+      "id": "93f3cdb7-f1cb-421e-8e84-cf83f401aa94",
+      "name": "A1 · Verificar credencial del lector",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.autorizado }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ad180f06-61db-47d7-a6ea-73a966b888d9",
+      "name": "A1 · ¿Lector autorizado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        96,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.respuesta }}",
+        "options": {}
+      },
+      "id": "1b3db007-1ede-4283-9ca9-3a15f3cf5c99",
+      "name": "A1 · Rechazar lector (401)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        336,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit?gid=215755798#gid=215755798",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 814967837,
+          "mode": "list",
+          "cachedResultName": "Lectores",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/edit#gid=814967837"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lector_id": "={{ $('A1 · Verificar credencial del lector').item.json.lector_id }}",
+            "ultimo_latido": "={{ $('A1 · Verificar credencial del lector').item.json.ultimo_latido }}"
+          },
+          "matchingColumns": [
+            "lector_id"
+          ],
+          "schema": [
+            {
+              "id": "lector_id",
+              "displayName": "lector_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "obra_id",
+              "displayName": "obra_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "token",
+              "displayName": "token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "zona",
+              "displayName": "zona",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "activo",
+              "displayName": "activo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ultimo_latido",
+              "displayName": "ultimo_latido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "descripcion",
+              "displayName": "descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "modo",
+              "displayName": "modo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "0cde442b-5eb9-42cb-9ca6-9ddce9b96671",
+      "name": "A1 · Latido del lector",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1856,
+        768
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## SEGURIDAD · CREDENCIAL DEL LECTOR\nCada ESP32 envía `Authorization: Bearer <token>`.\nEl Agente 1 lo compara con la pestaña **Lectores** antes de tocar el stock:\ntoken inválido o lector desactivado → **401** y nada se escribe.\nEl `obra_id` sale de la planilla, no del firmware.\nPara revocar un lector: cambia su token o pon `activo = no`.",
+        "height": 200,
+        "width": 460
+      },
+      "id": "313a8e50-00ff-4d86-a581-a0af506dbfcf",
+      "name": "Nota seguridad",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.onesignal.com/notifications",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"app_id\": \"4fbbb681-d0a9-4954-a335-50cd4f685d8b\", \"headings\": { \"en\": \"STOK · Bodega\", \"es\": \"STOK · Bodega\" }, \"contents\": { \"en\": $json.mensaje_pantalla, \"es\": $json.mensaje_pantalla }, \"url\": \"https://stok-aplicacion.vercel.app\", \"filters\": [ { \"field\": \"tag\", \"key\": \"obra_id\", \"relation\": \"=\", \"value\": $json.obra_id } ] } }}",
+        "options": {}
+      },
+      "id": "8b18fb15-efc2-4575-b21e-bfe078396daf",
+      "name": "A3 · Push (OneSignal)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1872,
+        2576
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\n\nreturn [{\n  json: {\n    ok: true,\n    hay_accion: true,\n    mensaje: d.mensaje_pantalla || 'Compras revisadas correctamente.',\n    recomendaciones: Array.isArray(d.recomendaciones) ? d.recomendaciones.length : 0,\n    total_estimado: d.total_estimado || 0,\n    fecha: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        3136
+      ],
+      "id": "febb6b9e-1f56-41e0-81e7-2431e5c6611d",
+      "name": "A3 · Respuesta dashboard OK",
+      "notes": "Agregar respuesta cuando si hay accion\n"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "content-type"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1808,
+        3136
+      ],
+      "id": "f2c4e4eb-cc3d-4941-89a8-5333e2eb0822",
+      "name": "A3 · Responder dashboard OK"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\n\nreturn [{\n  json: {\n    ok: true,\n    hay_accion: false,\n    mensaje: d.mensaje || 'Sin materiales nuevos que accionar hoy.',\n    fecha: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        3136
+      ],
+      "id": "51628a6e-c0aa-47ba-823a-d76fa55f44f4",
+      "name": "A3 · Responder sin acción"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "content-type"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1280,
+        3136
+      ],
+      "id": "f27bf157-995d-4083-b92b-580786794e19",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1_pfSmjktn5anIDjfrb7KrODsMwVNoFjv_3ssiNywHo4/values:batchGet?ranges=Inventario&ranges=Movimientos&ranges=Predicciones&ranges=Recomendaciones&ranges=Alertas&ranges=Lectores",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -96,
+        3696
+      ],
+      "id": "2f6291ed-5a8a-45de-95fa-35c0f47f57be",
+      "name": "API · Leer todas las hojas (batchGet)"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1136,
+        2912
+      ],
+      "id": "04c96d1c-a869-4747-a719-7f390fedb81f",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        1952
+      ],
+      "id": "c7a46d99-f0ad-43dc-b47d-47563c7f6fe9",
+      "name": "Agente de prediccion"
+    }
+  ],
+  "pinData": {
+    "API · GET dashboard": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.stokchile.store",
+            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "es-ES,es;q=0.6",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "186.11.82.227",
+            "cf-ipcountry": "CL",
+            "cf-ray": "a248c9096a47013c-GRU",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-warp-tag-id": "a34f9d31-b5ab-4455-a88b-6563c8af7e33",
+            "connection": "keep-alive",
+            "origin": "https://www.stokchile.online",
+            "priority": "u=1, i",
+            "referer": "https://www.stokchile.online/",
+            "sec-ch-ua": "\"Not=A?Brand\";v=\"99\", \"Brave\";v=\"151\", \"Chromium\";v=\"151\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Linux\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "sec-gpc": "1",
+            "x-forwarded-for": "186.11.82.227",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {
+            "obra_id": "OBRA-001"
+          },
+          "body": {},
+          "webhookUrl": "https://n8n.stokchile.store/webhook/stok/api/dashboard",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "A3 · Webhook acción": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.stokchile.store",
+            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+            "content-length": "47",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "es-ES,es;q=0.6",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "186.11.82.227",
+            "cf-ipcountry": "CL",
+            "cf-ray": "a24926b25c9f139e-GRU",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-warp-tag-id": "a34f9d31-b5ab-4455-a88b-6563c8af7e33",
+            "connection": "keep-alive",
+            "content-type": "application/json",
+            "origin": "https://www.stokchile.online",
+            "priority": "u=1, i",
+            "referer": "https://www.stokchile.online/",
+            "sec-ch-ua": "\"Not=A?Brand\";v=\"99\", \"Brave\";v=\"151\", \"Chromium\";v=\"151\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Linux\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "sec-gpc": "1",
+            "x-forwarded-for": "186.11.82.227",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "obra_id": "OBRA-001",
+            "disparador": "dashboard"
+          },
+          "webhookUrl": "https://n8n.stokchile.store/webhook/stok/agente/accion",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "A2 · Webhook recalcular": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.stokchile.store",
+            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+            "content-length": "47",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "es-ES,es;q=0.6",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "186.11.82.227",
+            "cf-ipcountry": "CL",
+            "cf-ray": "a2493105fc1377c0-GRU",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-warp-tag-id": "a34f9d31-b5ab-4455-a88b-6563c8af7e33",
+            "connection": "keep-alive",
+            "content-type": "application/json",
+            "origin": "https://www.stokchile.online",
+            "priority": "u=1, i",
+            "referer": "https://www.stokchile.online/",
+            "sec-ch-ua": "\"Not=A?Brand\";v=\"99\", \"Brave\";v=\"151\", \"Chromium\";v=\"151\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Linux\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "sec-gpc": "1",
+            "x-forwarded-for": "186.11.82.227",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "obra_id": "OBRA-001",
+            "disparador": "dashboard"
+          },
+          "webhookUrl": "https://n8n.stokchile.store/webhook/stok/agente/prediccion",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "A1 · Webhook lectura RFID": {
+      "main": [
+        [
+          {
+            "node": "A1 · Validar UID (NTAG215)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A1 · Validar UID (NTAG215)": {
+      "main": [
+        [
+          {
+            "node": "A1 · Leer lectores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A1 · Leer inventario": {
+      "main": [
+        [
+          {
+            "node": "A1 · Procesar movimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A1 · Procesar movimiento": {
+      "main": [
+        [
+          {
+            "node": "A1 · ¿Lectura válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A1 · Actualizar stock": {
+      "main": [
+        [
+          {
+            "node": "A1 · Registrar movimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A1 · Registrar movimiento": {
+      "main": [
+        [
+          {
+            "node": "A1 · Responder al lector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A1 · Responder al lector": {
+      "main": [
+        [
+          {
+            "node": "A1 · ¿Stock crítico?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "A1 · Latido del lector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A1 · ¿Lectura válida?": {
+      "main": [
+        [
+          {
+            "node": "A1 · Actualizar stock",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "A1 · Responder (UID inválido)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A1 · ¿Stock crítico?": {
+      "main": [
+        [
+          {
+            "node": "A1 · Despertar Agente de Acción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2 · Todos los días 06:00": {
+      "main": [
+        [
+          {
+            "node": "A2 · Buscar programación (Drive)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2 · Webhook recalcular": {
+      "main": [
+        [
+          {
+            "node": "A2 · Buscar programación (Drive)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2 · Buscar programación (Drive)": {
+      "main": [
+        [
+          {
+            "node": "A2 · Elegir archivo más reciente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2 · Elegir archivo más reciente": {
+      "main": [
+        [
+          {
+            "node": "A2 · Descargar programación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2 · Descargar programación": {
+      "main": [
+        [
+          {
+            "node": "A2 · Leer programación (CSV)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2 · Leer programación (CSV)": {
+      "main": [
+        [
+          {
+            "node": "A2 · Leer inventario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2 · Leer inventario": {
+      "main": [
+        [
+          {
+            "node": "A2 · Leer movimientos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2 · Leer movimientos": {
+      "main": [
+        [
+          {
+            "node": "A2 · Consolidar contexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2 · Consolidar contexto": {
+      "main": [
+        [
+          {
+            "node": "A2 · Agente IA - Predicción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2 · Agente IA - Predicción": {
+      "main": [
+        [
+          {
+            "node": "A2 · Parsear predicciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2 · Parsear predicciones": {
+      "main": [
+        [
+          {
+            "node": "A2 · Guardar predicciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2 · Guardar predicciones": {
+      "main": [
+        [
+          {
+            "node": "A2 · ¿Urgencia alta?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A2 · ¿Urgencia alta?": {
+      "main": [
+        [
+          {
+            "node": "A2 · Despertar Agente de Acción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3 · Webhook acción": {
+      "main": [
+        [
+          {
+            "node": "A3 · Leer inventario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3 · Leer inventario": {
+      "main": [
+        [
+          {
+            "node": "A3 · Leer predicciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3 · Leer predicciones": {
+      "main": [
+        [
+          {
+            "node": "A3 · Leer alertas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3 · Leer alertas": {
+      "main": [
+        [
+          {
+            "node": "A3 · Detectar qué accionar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3 · Detectar qué accionar": {
+      "main": [
+        [
+          {
+            "node": "A3 · ¿Hay que accionar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3 · ¿Hay que accionar?": {
+      "main": [
+        [
+          {
+            "node": "A3 · Agente IA - Acción",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "A3 · Responder sin acción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3 · Agente IA - Acción": {
+      "main": [
+        [
+          {
+            "node": "A3 · Parsear (con respaldo)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3 · Parsear (con respaldo)": {
+      "main": [
+        [
+          {
+            "node": "A3 · Enviar correo de alerta",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "A3 · Filas de recomendaciones",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "A3 · Filas de alertas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "A3 · Push (OneSignal)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "A3 · Respuesta dashboard OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3 · Filas de recomendaciones": {
+      "main": [
+        [
+          {
+            "node": "A3 · Guardar recomendaciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3 · Filas de alertas": {
+      "main": [
+        [
+          {
+            "node": "A3 · Guardar alertas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API · GET dashboard": {
+      "main": [
+        [
+          {
+            "node": "API · Leer todas las hojas (batchGet)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API · Consolidar payload": {
+      "main": [
+        [
+          {
+            "node": "API · Responder JSON (CORS)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PUB · POST mínimos": {
+      "main": [
+        [
+          {
+            "node": "PUB · Mapear filas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PUB · Mapear filas": {
+      "main": [
+        [
+          {
+            "node": "PUB · Actualizar inventario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "REC · POST estado compra": {
+      "main": [
+        [
+          {
+            "node": "REC · Mapear estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "REC · Mapear estado": {
+      "main": [
+        [
+          {
+            "node": "REC · Actualizar recomendación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A1 · Leer lectores": {
+      "main": [
+        [
+          {
+            "node": "A1 · Verificar credencial del lector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A1 · Verificar credencial del lector": {
+      "main": [
+        [
+          {
+            "node": "A1 · ¿Lector autorizado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A1 · ¿Lector autorizado?": {
+      "main": [
+        [
+          {
+            "node": "A1 · Leer inventario",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "A1 · Rechazar lector (401)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3 · Respuesta dashboard OK": {
+      "main": [
+        [
+          {
+            "node": "A3 · Responder dashboard OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A3 · Responder sin acción": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API · Leer todas las hojas (batchGet)": {
+      "main": [
+        [
+          {
+            "node": "API · Consolidar payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "A3 · Agente IA - Acción",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de prediccion": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "A2 · Agente IA - Predicción",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "03f1346c-e974-4b1f-980c-5b4ee3bea81c",
+  "meta": {
+    "instanceId": "fbeb49f30c787777b7453b691981d16cd718df140386eb52d2c51e6bf31cfc13"
+  },
+  "nodeGroups": [],
+  "id": "KOBDbQsnM5FuTZ68",
+  "tags": []
+}
