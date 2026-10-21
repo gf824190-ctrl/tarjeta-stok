@@ -1,171 +1,93 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta 
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-            >
-        <title>Stok | Tarjeta de presentacion digital</title>
-        <meta
-            name="description"
-            content="Stok desarrollo soluciones para mejorar la trazabilidad de materiales en obra de construcción"
-        >
-        <link rel="stylesheet" href="css/styles.css">
-    </head>
-    <body>
-        <main class="page">
-            <article class="digital-card">
-                <!--Encabezado principal-->
-                <header class="card-header">
-                    <div class="brand-mark" aria-hidden="true">
-                        S
-                    </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stok · Tarjeta de presentación digital</title>
+  <meta name="description" content="Stok: trazabilidad de materiales en obra con RFID, visión artificial e IA.">
+  <meta name="theme-color" content="#0b1450">
+  <link rel="icon" href="img/logo-stok.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main class="card">
+    <header class="head" style="background-color: #FFF1E6">
+      <div class="head-top">
+        <img src="img/logo-stok.png" alt="Stok" class="logo">
+        <span class="chip" id="saludo">Hola</span>
+      </div>
+      <h1 class="tagline">Trazabilidad de materiales en obra</h1>
+      <span class="eyebrow">Tarjeta de presentación digital</span>
+    </header>
 
-                    <p class="card-type">
-                        <span id="greeting">Bienvenido</span>
-                        <span aria-hidden="true">·</span>
-                        Tarjeta de presentación digital
-                    </p>
+    <nav class="actions" aria-label="Acciones rápidas">
+      <a class="action" href="tel:+56941680798">
+        <span class="tile tile-orange"><svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></span>Llamar</a>
+      <a class="action" href="https://wa.me/56941680798?text=Hola%20Stok%2C%20vi%20su%20tarjeta%20digital" target="_blank" rel="noopener noreferrer">
+        <span class="tile tile-green"><svg viewBox="0 0 24 24"><path d="M3 21l1.7-5A8.5 8.5 0 1 1 8 19.3z"/></svg></span>WhatsApp</a>
+      <a class="action" href="mailto:empresastaller2026@gmail.com?subject=Contacto%20desde%20la%20tarjeta%20digital%20de%20Stok">
+        <span class="tile tile-blue"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>Correo</a>
+      <a class="action" href="stok.vcf" download="Stok.vcf" id="guardar">
+        <span class="tile tile-white" style="background-color: #FFF1E6"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></span>Guardar</a>
+    </nav>
 
-                    <h1>Stok</h1>
+    <div class="pills">
+      <a class="pill" href="https://www.stokchile.cl/#aku" target="_blank" rel="noopener noreferrer">Sitio web ↗</a>
+      <a class="pill" href="https://www.instagram.com/stok.cl/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
+      <button class="pill" type="button" id="compartir">Compartir</button>
+    </div>
 
-                    <p class="tagline">
-                        Trazabilidad de materiales en obra
-                    </p>
-                </header>
-                <!-- Botones principales de contacto -->
-                    <section class="actions-section" aria-labelledby="actions-title">
-                        <h2 id="actions-title">Contacto rápido</h2>
+    <div class="tabs" role="tablist">
+      <button class="tab is-active" role="tab" data-tab="nosotros" aria-selected="true">Nosotros</button>
+      <button class="tab" role="tab" data-tab="equipo" aria-selected="false">Equipo</button>
+      <button class="tab" role="tab" data-tab="contacto" aria-selected="false">Contacto</button>
+    </div>
 
-                        <div class="action-grid">
-
-                            <!-- Correo electrónico -->
-                           <a
-                                class="action-button action-button--primary"
-                                href="mailto:empresastaller2026@gmail.com?subject=Contacto%20desde%20la%20tarjeta%20digital%20de%20Stok"
-                            >
-                                <svg
-                                    class="action-icon"
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                >
-                                    <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-                                    <path d="m3 7 9 6 9-6"></path>
-                                </svg>
-
-                                <span>Enviar correo</span>
-                            </a>
-
-                            <!-- Página empresarial -->
-                            <a
-                                class="action-button"
-                                href="https://www.stokchile.cl/#aku"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <svg
-                                    class="action-icon"
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                >
-                                    <circle cx="12" cy="12" r="9"></circle>
-                                    <path d="M3 12h18"></path>
-                                    <path d="M12 3a14 14 0 0 1 0 18"></path>
-                                    <path d="M12 3a14 14 0 0 0 0 18"></path>
-                                </svg>
-
-                                <span>Sitio web</span>
-                            </a>
-
-                            <!-- Instagram -->
-                            <a
-                                class="action-button"
-                                href="https://www.instagram.com/stok.cl/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <svg
-                                    class="action-icon"
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                >
-                                    <rect x="3" y="3" width="18" height="18" rx="5"></rect>
-                                    <circle cx="12" cy="12" r="4"></circle>
-                                    <circle cx="17.5" cy="6.5" r="0.8"></circle>
-                                </svg>
-
-                                <span>Instagram</span>
-                            </a>
-                            <!-- Guardar contacto -->
-                            <a
-                                class="action-button action-button--save"
-                                href="stok.vcf"
-                                download="Stok.vcf"
-                            >
-                                <svg
-                                    class="action-icon"
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                >
-                                    <circle cx="9" cy="8" r="4"></circle>
-                                    <path d="M2.5 21a6.5 6.5 0 0 1 13 0"></path>
-                                    <path d="M19 8v6"></path>
-                                    <path d="M16 11h6"></path>
-                                </svg>
-
-                                <span>Guardar contacto</span>
-                            </a>
-                        </div>
-                    </section>
-                <!--Descripcion de la empresa-->
-                <section class="about-section" aria-labelledby="about-title">
-                    <h2 id="about-title">Sobre nosotros</h2>
-                    <p>
-                        Somos un grupo de estudiantes de la Universidad del Bío-Bío unidos por un mismo objetivo: mejorar la trazabilidad de los materiales 
-                        en las bodegas de obra mediante el uso de tecnología RFID y agentes de inteligencia artificial especializados.
-                    </p>
-                </section>
-                <!--Integrantes y profesiones-->
-                <section class="team-section" aria-labelledby="team-title">
-                    <h2 id="team-title">Nuestro equipo</h2>
-
-                    <ul class="team-list">
-                        <li>Gustavo Fierro - Ingeniero civil en automatizacion</li>
-                        <li>Joaquin Gonzáles - Ingeniero civil en construccion</li>
-                        <li>Kevin Escobar - Ingeniero civil en construccion</li>
-                    </ul>
-                </section>
-                <!--Informacion de contacto-->
-                <!-- Datos visibles de la empresa -->
-<section class="contact-section" aria-labelledby="contact-title">
-    <h2 id="contact-title">Datos de Stok</h2>
-
-    <dl class="contact-list">
-        <div class="contact-item">
-            <dt>Correo electrónico</dt>
-            <dd>empresastaller2026@gmail.com</dd>
+    <section class="sheet" style="background-color: #FFF1E6">
+      <div class="panel" id="panel-nosotros">
+        <p class="text">Somos el equipo fundador de Stok. Queremos digitalizar las bodegas de la construcción, registrando de forma automática cada activo que entra y sale.</p>
+        <span class="label">Cómo funciona</span>
+        <div class="stepper">
+          <div class="stepper-line"></div>
+          <button class="step is-active" data-step="0"><span class="dot">1</span>Etiquetamos</button>
+          <button class="step" data-step="1"><span class="dot">2</span>Contamos</button>
+          <button class="step" data-step="2"><span class="dot">3</span>Automatizamos</button>
         </div>
-
-        <div class="contact-item">
-            <dt>Ubicación</dt>
-            <dd>Concepción, Chile</dd>
+        <div class="step-box">
+          <span class="step-tag" id="step-tag">Paso 1 de 3</span>
+          <strong class="step-title" id="step-title"></strong>
+          <p class="text" id="step-text"></p>
+          <button class="btn-next" id="step-next" type="button">Siguiente →</button>
         </div>
-    </dl>
-</section>
+        <div class="privacy">
+          <span class="privacy-icon"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+          <div>
+            <strong>¿Quién es dueño de los datos?</strong>
+            <p>Ustedes. Nuestro sistema es privado y seguro: la información se guarda cifrada como números, y solo ustedes la ven traducida. No usamos sus datos.</p>
+          </div>
+        </div>
+      </div>
 
-            <!-- Pie de la tarjeta -->
-            <footer class="card-footer">
-                <p>
-                     © <span id="current-year">2026</span>
-                    Stok · Concepción, Chile
-                </p>
-            </footer>
+      <div class="panel" id="panel-equipo" hidden>
+        <div class="member"><img src="img/gustavo.jpeg" alt="Gustavo Fierro"><div><strong>Gustavo Fierro</strong><span>Ingeniero civil en automatizacion</span></div></div>
+        <div class="member"><img src="img/joaquin.jpeg" alt="Joaquin Gonzáles"><div><strong>Joaquin Gonzáles</strong><span>Ingeniero civil en construccion</span></div></div>
+        <div class="member"><img src="img/kevin.jpeg" alt="Kevin Escobar"><div><strong>Kevin Escobar</strong><span>Ingeniero civil en construccion</span></div></div>
+      </div>
 
-        </article>
-    </main>
+      <div class="panel" id="panel-contacto" hidden>
+        <button class="row" type="button" data-copy="+56941680798" data-msg="Teléfono copiado"><span><small>Teléfono</small>+56 9 4168 0798</span><em>Copiar</em></button>
+        <button class="row" type="button" data-copy="empresastaller2026@gmail.com" data-msg="Correo copiado"><span><small>Correo</small>empresastaller2026@gmail.com</span><em>Copiar</em></button>
+        <div class="row"><span><small>Ubicación</small>Concepción, Chile</span></div>
+      </div>
+    </section>
 
-    <script src="js/script.js"></script>
+    <footer class="foot">© <span id="anio"></span> Stok · Concepción, Chile</footer>
+  </main>
 
-    </body>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/script.js"></script>
+</body>
 </html>
