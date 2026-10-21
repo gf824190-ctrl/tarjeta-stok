@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Space+Grotesk:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;600&amp;family=Instrument+Serif&amp;family=Manrope:wght@400;500;700&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>body{margin:0;background:#e9e7e2;font-family:'IBM Plex Sans',sans-serif}a{color:inherit}a:hover{opacity:.85}</style>
+</helmet>
+
+<section style="padding:56px 56px 0;display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;flex-direction:column;gap:8px;max-width:760px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b6760;letter-spacing:.08em;text-transform:uppercase">Turno 3 · Paleta de 2b, formato de 2a</div>
+    <div style="font-size:28px;font-weight:600;color:#1c1b19">Tarjeta didáctica: cómo funciona Stok, paso a paso</div>
+    <div style="font-size:15px;line-height:1.6;color:#55514b;text-wrap:pretty">Logo original sobre cabecera blanca. En la pestaña Nosotros, toca cada paso (1, 2, 3) o usa “Siguiente” para recorrer el proceso.</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+    <div id="3a" style="display:flex;flex-direction:column;gap:14px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;background:#0b1450;color:#ffffff;padding:4px 9px;border-radius:6px">3a</span>
+        <span style="font-size:14px;color:#3a3833">Didáctica · Bricolage Grotesque + DM Mono</span>
+      </div>
+      <article style="background:#0b1450;border-radius:28px;overflow:hidden;box-shadow:0 24px 60px rgba(11,20,80,.35);font-family:'Bricolage Grotesque',sans-serif;color:#ffffff">
+        <header style="color: #0b1450; padding: 26px 24px 24px; border-radius: 0 0 28px 28px; display: flex; flex-direction: column; gap: 14px; background-color: #FFF1E6">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <img src="assets/logo-stok.png" alt="Stok" style="display:block;height:54px;width:auto">
+            <span style="font-family:'DM Mono',monospace;font-size:11px;background:#0b1450;color:#ffffff;padding:6px 10px;border-radius:999px">{{ greeting }}</span>
+          </div>
+          <p style="margin:0;font-size:23px;line-height:1.2;font-weight:600;text-wrap:pretty">Trazabilidad de materiales en obra</p>
+          <span style="font-family:'DM Mono',monospace;font-size:12px;color:#b2440a">Tarjeta de presentación digital</span>
+        </header>
+        <div style="padding:22px 20px 10px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">
+          <a href="tel:+56941680798" style="display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:#ffffff;font-size:13px;font-weight:600;transition:transform .15s" style-active="transform:scale(.93)">
+            <span style="width:100%;aspect-ratio:1;border-radius:22px;background:#ff6b1a;color:#0b1450;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"></path></svg></span>Llamar</a>
+          <a href="https://wa.me/56941680798?text=Hola%20Stok%2C%20vi%20su%20tarjeta%20digital" target="_blank" rel="noopener noreferrer" style="display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:#ffffff;font-size:13px;font-weight:600;transition:transform .15s" style-active="transform:scale(.93)">
+            <span style="width:100%;aspect-ratio:1;border-radius:22px;background:#25d366;color:#062e17;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 21l1.7-5A8.5 8.5 0 1 1 8 19.3z"></path></svg></span>WhatsApp</a>
+          <a href="mailto:empresastaller2026@gmail.com?subject=Contacto%20desde%20la%20tarjeta%20digital%20de%20Stok" style="display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:#ffffff;font-size:13px;font-weight:600;transition:transform .15s" style-active="transform:scale(.93)">
+            <span style="width:100%;aspect-ratio:1;border-radius:22px;background:#3355ff;color:#ffffff;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg></span>Correo</a>
+          <button onClick="{{ saveContact }}" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:0;border:0;background:none;color:#ffffff;font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:transform .15s" style-active="transform:scale(.93)">
+            <span style="width:100%;aspect-ratio:1;border-radius:22px;background:#ffffff;color:#0b1450;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg></span>Guardar</button>
+        </div>
+        <div style="padding:10px 20px 20px;display:flex;gap:8px;flex-wrap:wrap">
+          <a href="https://www.stokchile.cl/#aku" target="_blank" rel="noopener noreferrer" style="min-height:44px;padding:0 16px;display:flex;align-items:center;border:1.5px solid #2c3a96;border-radius:999px;text-decoration:none;color:#ffffff;font-size:14px;font-weight:600" style-hover="border-color:#ff6b1a">Sitio web ↗</a>
+          <a href="https://www.instagram.com/stok.cl/" target="_blank" rel="noopener noreferrer" style="min-height:44px;padding:0 16px;display:flex;align-items:center;border:1.5px solid #2c3a96;border-radius:999px;text-decoration:none;color:#ffffff;font-size:14px;font-weight:600" style-hover="border-color:#ff6b1a">Instagram ↗</a>
+          <button onClick="{{ share }}" style="min-height:44px;padding:0 16px;display:flex;align-items:center;border:1.5px solid #2c3a96;border-radius:999px;background:transparent;color:#ffffff;font:inherit;font-size:14px;font-weight:600;cursor:pointer" style-hover="border-color:#ff6b1a">Compartir</button>
+        </div>
+        <div style="margin:0 20px 20px;padding:5px;background:#16206a;border-radius:999px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px">
+          <sc-for list="{{ tabs3 }}" as="t" hint-placeholder-count="3">
+            <button onClick="{{ t.select }}" style="min-height:44px;border:0;border-radius:999px;background:{{ t.bg }};color:{{ t.fg }};font:inherit;font-weight:600;font-size:15px;cursor:pointer;transition:background .2s,color .2s">{{ t.label }}</button>
+          </sc-for>
+        </div>
+        <div style="background:#ffffff;color:#0b1450;border-radius:28px 28px 0 0;padding:24px 22px 26px;min-height:360px">
+          <sc-if value="{{ tab3Nosotros }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <p style="margin:0;font-size:16px;line-height:1.6;color:#2c3570;text-wrap:pretty">Somos el equipo fundador de Stok. Queremos digitalizar las bodegas de la construcción, registrando de forma automática cada activo que entra y sale.</p>
+              <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#b2440a">Cómo funciona</div>
+              <div style="position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+                <div style="position:absolute;left:16%;right:16%;top:24px;height:3px;background:#e4e8fa;border-radius:2px"></div>
+                <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+                  <button onClick="{{ s.select }}" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:0;border:0;background:none;font:inherit;color:#0b1450;cursor:pointer">
+                    <span style="width:50px;height:50px;border-radius:50%;background:{{ s.bg }};color:{{ s.fg }};border:3px solid #ffffff;box-shadow:0 0 0 2px {{ s.ring }};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;transition:background .2s,color .2s">{{ s.n }}</span>
+                    <span style="font-size:13px;font-weight:700">{{ s.short }}</span>
+                  </button>
+                </sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;padding:18px;background:#fff1e6;border-radius:20px">
+                <span style="font-family:'DM Mono',monospace;font-size:11px;color:#b2440a">{{ stepTag }}</span>
+                <span style="font-size:19px;font-weight:700;line-height:1.2">{{ stepTitle }}</span>
+                <p style="margin:0;font-size:15px;line-height:1.6;color:#2c3570;text-wrap:pretty">{{ stepText }}</p>
+                <button onClick="{{ nextStep }}" style="align-self:flex-start;margin-top:4px;min-height:44px;padding:0 18px;border:0;border-radius:999px;background:#0b1450;color:#ffffff;font:inherit;font-weight:600;font-size:14px;cursor:pointer;transition:transform .15s" style-active="transform:scale(.95)">{{ nextLabel }}</button>
+              </div>
+              <div style="display:flex;gap:14px;align-items:flex-start;padding:18px;background:#0b1450;color:#ffffff;border-radius:20px">
+                <span style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:#ff6b1a;color:#0b1450;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <span style="font-size:16px;font-weight:700">¿Quién es dueño de los datos?</span>
+                  <p style="margin:0;font-size:14px;line-height:1.6;color:#d6dcff;text-wrap:pretty">Ustedes. Nuestro sistema es privado y seguro: la información se guarda cifrada como números, y solo ustedes la ven traducida. No usamos sus datos.</p>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ tab3Equipo }}">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <sc-for list="{{ team }}" as="m" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:14px;padding:10px;background:#f0f2fb;border-radius:20px">
+                  <img src="{{ m.photo }}" alt="{{ m.name }}" style="width:68px;height:68px;flex-shrink:0;object-fit:cover;object-position:50% 20%;border-radius:16px">
+                  <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+                    <span style="font-weight:700;font-size:17px">{{ m.name }}</span>
+                    <span style="font-family:'DM Mono',monospace;font-size:12px;color:#4a5288">{{ m.role }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ tab3Contacto }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <button onClick="{{ copyPhone }}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:60px;padding:0 16px;background:#f0f2fb;border:0;border-radius:18px;font:inherit;color:#0b1450;cursor:pointer;text-align:left" style-hover="background:#e4e8fa">
+                <span style="display:flex;flex-direction:column;gap:2px"><span style="font-family:'DM Mono',monospace;font-size:11px;color:#4a5288">Teléfono</span><span style="font-size:16px;font-weight:600">+56 9 4168 0798</span></span>
+                <span style="font-family:'DM Mono',monospace;font-size:12px;color:#b2440a">{{ phoneLabel }}</span>
+              </button>
+              <button onClick="{{ copyEmail }}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:60px;padding:0 16px;background:#f0f2fb;border:0;border-radius:18px;font:inherit;color:#0b1450;cursor:pointer;text-align:left" style-hover="background:#e4e8fa">
+                <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-family:'DM Mono',monospace;font-size:11px;color:#4a5288">Correo</span><span style="font-size:15px;font-weight:600;overflow-wrap:anywhere">empresastaller2026@gmail.com</span></span>
+                <span style="font-family:'DM Mono',monospace;font-size:12px;color:#b2440a">{{ copyLabel }}</span>
+              </button>
+              <div style="display:flex;flex-direction:column;gap:2px;min-height:60px;justify-content:center;padding:0 16px;background:#f0f2fb;border-radius:18px">
+                <span style="font-family:'DM Mono',monospace;font-size:11px;color:#4a5288">Ubicación</span><span style="font-size:16px;font-weight:600">Concepción, Chile</span>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+        <footer style="color:#b9c4ff;padding:16px 24px;font-family:'DM Mono',monospace;font-size:11px">© {{ year }} Stok · Concepción, Chile</footer>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section style="padding:56px 56px 0;display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;flex-direction:column;gap:8px;max-width:760px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b6760;letter-spacing:.08em;text-transform:uppercase">Turno 2 · Más vívido e interactivo</div>
+    <div style="font-size:28px;font-weight:600;color:#1c1b19">Paleta del logo, teléfono y navegación interactiva</div>
+    <div style="font-size:15px;line-height:1.6;color:#55514b;text-wrap:pretty">Azul marino y naranja del logo, con acentos más saturados. Llamar y WhatsApp como acciones principales. En 2a el contenido va en pestañas; en 2b las preguntas se despliegan y el equipo se desliza.</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+
+    <div id="2a" style="display:flex;flex-direction:column;gap:14px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;background:#ff6b1a;color:#0f1a5c;padding:4px 9px;border-radius:6px">2a</span>
+        <span style="font-size:14px;color:#3a3833">Pestañas · Bricolage Grotesque + DM Mono</span>
+      </div>
+      <article style="background:#ffffff;border-radius:28px;overflow:hidden;box-shadow:0 24px 60px rgba(15,26,92,.22);font-family:'Bricolage Grotesque',sans-serif;color:#0f1a5c">
+        <header style="padding: 26px 24px 22px; display: flex; flex-direction: column; gap: 14px; background-color: #FFF1E6">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <img src="assets/logo-stok.png" alt="Stok" style="display:block;height:50px;width:auto">
+            <span style="font-family:'DM Mono',monospace;font-size:11px;background:#ffffff;color:#0f1a5c;padding:6px 10px;border-radius:999px">{{ greeting }}</span>
+          </div>
+          <p style="margin:0;font-size:23px;line-height:1.2;font-weight:600;text-wrap:pretty">Trazabilidad de materiales en obra</p>
+          <span style="font-family:'DM Mono',monospace;font-size:12px;color:#b2440a">Tarjeta de presentación digital</span>
+        </header>
+        <div style="padding:20px 20px 10px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">
+          <a href="tel:+56941680798" style="display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:#0f1a5c;font-size:13px;font-weight:600;transition:transform .15s" style-active="transform:scale(.93)">
+            <span style="width:100%;aspect-ratio:1;border-radius:22px;background:#ff6b1a;color:#ffffff;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"></path></svg></span>Llamar</a>
+          <a href="https://wa.me/56941680798?text=Hola%20Stok%2C%20vi%20su%20tarjeta%20digital" target="_blank" rel="noopener noreferrer" style="display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:#0f1a5c;font-size:13px;font-weight:600;transition:transform .15s" style-active="transform:scale(.93)">
+            <span style="width:100%;aspect-ratio:1;border-radius:22px;background:#25d366;color:#073b1d;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 21l1.7-5A8.5 8.5 0 1 1 8 19.3z"></path></svg></span>WhatsApp</a>
+          <a href="mailto:empresastaller2026@gmail.com?subject=Contacto%20desde%20la%20tarjeta%20digital%20de%20Stok" style="display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:#0f1a5c;font-size:13px;font-weight:600;transition:transform .15s" style-active="transform:scale(.93)">
+            <span style="width:100%;aspect-ratio:1;border-radius:22px;background:#3355ff;color:#ffffff;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg></span>Correo</a>
+          <button onClick="{{ saveContact }}" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:0;border:0;background:none;color:#0f1a5c;font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:transform .15s" style-active="transform:scale(.93)">
+            <span style="width:100%;aspect-ratio:1;border-radius:22px;background:#0f1a5c;color:#ffffff;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg></span>Guardar</button>
+        </div>
+        <div style="padding:8px 20px 20px;display:flex;gap:8px;flex-wrap:wrap">
+          <a href="https://www.stokchile.cl/#aku" target="_blank" rel="noopener noreferrer" style="min-height:44px;padding:0 16px;display:flex;align-items:center;gap:8px;border:1.5px solid #dfe2f2;border-radius:999px;text-decoration:none;color:#0f1a5c;font-size:14px;font-weight:600" style-hover="background:#f0f2fb;border-color:#0f1a5c">Sitio web ↗</a>
+          <a href="https://www.instagram.com/stok.cl/" target="_blank" rel="noopener noreferrer" style="min-height:44px;padding:0 16px;display:flex;align-items:center;gap:8px;border:1.5px solid #dfe2f2;border-radius:999px;text-decoration:none;color:#0f1a5c;font-size:14px;font-weight:600" style-hover="background:#f0f2fb;border-color:#0f1a5c">Instagram ↗</a>
+          <button onClick="{{ share }}" style="min-height:44px;padding:0 16px;display:flex;align-items:center;gap:8px;border:1.5px solid #dfe2f2;border-radius:999px;background:#ffffff;color:#0f1a5c;font:inherit;font-size:14px;font-weight:600;cursor:pointer" style-hover="background:#f0f2fb;border-color:#0f1a5c">Compartir</button>
+        </div>
+        <div style="margin:0 20px;padding:5px;background:#f0f2fb;border-radius:999px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+            <button onClick="{{ t.select }}" style="min-height:44px;border:0;border-radius:999px;background:{{ t.bg }};color:{{ t.fg }};font:inherit;font-weight:600;font-size:15px;cursor:pointer;transition:background .2s,color .2s">{{ t.label }}</button>
+          </sc-for>
+        </div>
+        <div style="padding:22px 24px 26px;min-height:300px">
+          <sc-if value="{{ tabNosotros }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <p style="margin:0;font-size:16px;line-height:1.6;color:#2c3570;text-wrap:pretty">Somos el equipo fundador de Stok. Queremos digitalizar las bodegas de la construcción, registrando de forma automática cada activo que entra y sale.</p>
+              <sc-for list="{{ faq }}" as="f" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;gap:4px;padding-left:14px;border-left:3px solid #ff6b1a">
+                  <span style="font-weight:700;font-size:16px">{{ f.q }}</span>
+                  <p style="margin:0;font-size:15px;line-height:1.6;color:#2c3570;text-wrap:pretty">{{ f.a }}</p>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ tabEquipo }}">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <sc-for list="{{ team }}" as="m" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:14px;padding:10px;background:#f6f7fc;border-radius:20px">
+                  <img src="{{ m.photo }}" alt="{{ m.name }}" style="width:68px;height:68px;flex-shrink:0;object-fit:cover;object-position:50% 20%;border-radius:16px">
+                  <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+                    <span style="font-weight:700;font-size:17px">{{ m.name }}</span>
+                    <span style="font-family:'DM Mono',monospace;font-size:12px;color:#4a5288">{{ m.role }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ tabContacto }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <button onClick="{{ copyPhone }}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:60px;padding:0 16px;background:#f6f7fc;border:0;border-radius:18px;font:inherit;color:#0f1a5c;cursor:pointer;text-align:left" style-hover="background:#eceefa">
+                <span style="display:flex;flex-direction:column;gap:2px"><span style="font-family:'DM Mono',monospace;font-size:11px;color:#4a5288">Teléfono</span><span style="font-size:16px;font-weight:600">+56 9 4168 0798</span></span>
+                <span style="font-family:'DM Mono',monospace;font-size:12px;color:#b2440a">{{ phoneLabel }}</span>
+              </button>
+              <button onClick="{{ copyEmail }}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:60px;padding:0 16px;background:#f6f7fc;border:0;border-radius:18px;font:inherit;color:#0f1a5c;cursor:pointer;text-align:left" style-hover="background:#eceefa">
+                <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-family:'DM Mono',monospace;font-size:11px;color:#4a5288">Correo</span><span style="font-size:15px;font-weight:600;overflow-wrap:anywhere">empresastaller2026@gmail.com</span></span>
+                <span style="font-family:'DM Mono',monospace;font-size:12px;color:#b2440a">{{ copyLabel }}</span>
+              </button>
+              <div style="display:flex;flex-direction:column;gap:2px;min-height:60px;justify-content:center;padding:0 16px;background:#f6f7fc;border-radius:18px">
+                <span style="font-family:'DM Mono',monospace;font-size:11px;color:#4a5288">Ubicación</span><span style="font-size:16px;font-weight:600">Concepción, Chile</span>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+        <footer style="background:#0f1a5c;color:#c7cdf5;padding:16px 24px;font-family:'DM Mono',monospace;font-size:11px">© {{ year }} Stok · Concepción, Chile</footer>
+      </article>
+    </div>
+
+    <div id="2b" style="display:flex;flex-direction:column;gap:14px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;background:#ff6b1a;color:#0f1a5c;padding:4px 9px;border-radius:6px">2b</span>
+        <span style="font-size:14px;color:#3a3833">Señal · Space Grotesk + JetBrains Mono</span>
+      </div>
+      <article style="background:#0b1450;border-radius:28px;overflow:hidden;box-shadow:0 24px 60px rgba(11,20,80,.35);font-family:'Space Grotesk',sans-serif;color:#ffffff">
+        <header style="padding:26px 24px 24px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <img src="assets/logo-stok-claro.png" alt="Stok" style="display:block;height:52px;width:auto">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#b9c4ff;text-align:right">{{ greeting }}</span>
+          </div>
+          <p style="margin:0;font-size:28px;line-height:1.1;font-weight:700;letter-spacing:-.02em;text-wrap:pretty">Trazabilidad de materiales en obra</p>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#ff8a45">Tarjeta de presentación digital</span>
+        </header>
+        <div style="padding:0 20px 24px;display:flex;flex-direction:column;gap:10px">
+          <a href="tel:+56941680798" style="min-height:62px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px;background:#ff6b1a;color:#0b1450;border-radius:18px;text-decoration:none;font-weight:700;font-size:18px;transition:transform .15s" style-active="transform:scale(.97)" style-hover="background:#ff7d36">
+            <span style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"></path></svg>Llamar ahora</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600">+56 9 4168 0798</span>
+          </a>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <a href="https://wa.me/56941680798?text=Hola%20Stok%2C%20vi%20su%20tarjeta%20digital" target="_blank" rel="noopener noreferrer" style="min-height:56px;display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:#062e17;border-radius:18px;text-decoration:none;font-weight:700;font-size:16px;transition:transform .15s" style-active="transform:scale(.96)">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 21l1.7-5A8.5 8.5 0 1 1 8 19.3z"></path></svg>WhatsApp</a>
+            <a href="mailto:empresastaller2026@gmail.com?subject=Contacto%20desde%20la%20tarjeta%20digital%20de%20Stok" style="min-height:56px;display:flex;align-items:center;justify-content:center;gap:8px;background:#3355ff;color:#ffffff;border-radius:18px;text-decoration:none;font-weight:700;font-size:16px;transition:transform .15s" style-active="transform:scale(.96)">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>Correo</a>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button onClick="{{ saveContact }}" style="min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px;background:#16206a;color:#ffffff;border:1.5px solid #2c3a96;border-radius:16px;font:inherit;font-weight:600;font-size:15px;cursor:pointer;transition:transform .15s" style-hover="border-color:#ff6b1a" style-active="transform:scale(.96)">Guardar contacto</button>
+            <button onClick="{{ share }}" style="min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px;background:#16206a;color:#ffffff;border:1.5px solid #2c3a96;border-radius:16px;font:inherit;font-weight:600;font-size:15px;cursor:pointer;transition:transform .15s" style-hover="border-color:#ff6b1a" style-active="transform:scale(.96)">Compartir</button>
+            <a href="https://www.stokchile.cl/#aku" target="_blank" rel="noopener noreferrer" style="min-height:52px;display:flex;align-items:center;justify-content:center;background:#16206a;color:#ffffff;border:1.5px solid #2c3a96;border-radius:16px;text-decoration:none;font-weight:600;font-size:15px" style-hover="border-color:#ff6b1a">Sitio web ↗</a>
+            <a href="https://www.instagram.com/stok.cl/" target="_blank" rel="noopener noreferrer" style="min-height:52px;display:flex;align-items:center;justify-content:center;background:#16206a;color:#ffffff;border:1.5px solid #2c3a96;border-radius:16px;text-decoration:none;font-weight:600;font-size:15px" style-hover="border-color:#ff6b1a">Instagram ↗</a>
+          </div>
+        </div>
+        <div style="background:#ffffff;color:#0b1450;border-radius:28px 28px 0 0;padding:26px 20px 8px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#b2440a;padding:0 4px">Sobre nosotros</div>
+          <p style="margin:0;padding:0 4px;font-size:16px;line-height:1.6;color:#2c3570;text-wrap:pretty">Somos el equipo fundador de Stok. Queremos digitalizar las bodegas de la construcción, registrando de forma automática cada activo que entra y sale.</p>
+          <sc-for list="{{ faq }}" as="f" hint-placeholder-count="3">
+            <div style="border-radius:18px;overflow:hidden;background:#f0f2fb">
+              <button onClick="{{ f.toggle }}" style="width:100%;min-height:56px;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:0 16px;border:0;background:{{ f.bg }};color:{{ f.fg }};font:inherit;font-weight:700;font-size:16px;cursor:pointer;text-align:left;transition:background .2s,color .2s">{{ f.q }}<span style="font-size:22px;line-height:1">{{ f.mark }}</span></button>
+              <sc-if value="{{ f.open }}">
+                <p style="margin:0;padding:14px 16px 16px;font-size:15px;line-height:1.6;color:#2c3570;text-wrap:pretty">{{ f.a }}</p>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#ffffff;color:#0b1450;padding:22px 0 8px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;justify-content:space-between;padding:0 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase"><span style="color:#b2440a">Nuestro equipo</span><span style="color:#4a5288">Desliza →</span></div>
+          <div style="display:flex;gap:12px;overflow-x:auto;padding:0 24px 12px;scroll-snap-type:x mandatory">
+            <sc-for list="{{ team }}" as="m" hint-placeholder-count="3">
+              <div style="flex:0 0 160px;scroll-snap-align:start;display:flex;flex-direction:column;gap:8px">
+                <img src="{{ m.photo }}" alt="{{ m.name }}" style="width:160px;height:190px;object-fit:cover;object-position:50% 20%;border-radius:20px;background:#f0f2fb">
+                <span style="font-weight:700;font-size:16px;line-height:1.2">{{ m.name }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.4;color:#4a5288">{{ m.role }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#ffffff;color:#0b1450;padding:8px 20px 24px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#b2440a;padding:0 4px">Datos de Stok</div>
+          <button onClick="{{ copyPhone }}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:52px;padding:0 16px;background:#f0f2fb;border:0;border-radius:16px;font:inherit;color:#0b1450;cursor:pointer;text-align:left" style-hover="background:#e4e8fa">
+            <span style="font-size:15px;font-weight:600">+56 9 4168 0798</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#b2440a">{{ phoneLabel }}</span>
+          </button>
+          <button onClick="{{ copyEmail }}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:52px;padding:0 16px;background:#f0f2fb;border:0;border-radius:16px;font:inherit;color:#0b1450;cursor:pointer;text-align:left" style-hover="background:#e4e8fa">
+            <span style="font-size:15px;font-weight:600;overflow-wrap:anywhere">empresastaller2026@gmail.com</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#b2440a">{{ copyLabel }}</span>
+          </button>
+          <div style="font-size:15px;color:#2c3570;padding:4px">Concepción, Chile</div>
+        </div>
+        <footer style="color:#b9c4ff;padding:16px 24px;font-family:'JetBrains Mono',monospace;font-size:11px">© {{ year }} Stok · Concepción, Chile</footer>
+      </article>
+    </div>
+
+  </div>
+  <sc-if value="{{ toastOn }}">
+    <div style="position:fixed;left:50%;bottom:32px;transform:translateX(-50%);z-index:50;background:#0f1a5c;color:#ffffff;padding:14px 22px;border-radius:999px;font-size:15px;font-weight:500;box-shadow:0 12px 30px rgba(15,26,92,.35);display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;border-radius:50%;background:#ff6b1a"></span>{{ toastMsg }}</div>
+  </sc-if>
+</section>
+
+<section style="padding:56px;display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;flex-direction:column;gap:8px;max-width:760px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6b6760;letter-spacing:.08em;text-transform:uppercase">Turno 1 · Color y tipografía</div>
+    <div style="font-size:28px;font-weight:600;color:#1c1b19">Cuatro pares de color y fuente para la tarjeta de Stok</div>
+    <div style="font-size:15px;line-height:1.6;color:#55514b;text-wrap:pretty">Mismo contenido y estructura en las cuatro. Prueba los botones: copiar correo, guardar contacto (descarga un .vcf real) y compartir.</div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+
+    <!-- 1a -->
+    <div id="1a" style="display:flex;flex-direction:column;gap:14px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;background:#1c1b19;color:#fff;padding:4px 9px;border-radius:6px">1a</span>
+        <span style="font-size:14px;color:#3a3833">Plano técnico · IBM Plex Sans + Plex Mono</span>
+      </div>
+      <article style="background:#f4f1ea;border-radius:24px;overflow:hidden;box-shadow:0 20px 50px rgba(14,31,56,.18);font-family:'IBM Plex Sans',sans-serif;color:#0e1f38">
+        <header style="background:#0e1f38;color:#f4f1ea;padding:32px 28px 30px;display:flex;flex-direction:column;gap:14px;background-image:linear-gradient(rgba(244,241,234,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(244,241,234,.06) 1px,transparent 1px);background-size:22px 22px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#c9cfd9">{{ greeting }}</span>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#ef8a3c">Tarjeta de presentación digital</div>
+          <h1 style="margin:0;align-self:flex-start"><img src="assets/logo-stok-claro.png" alt="Stok" style="display:block;height:64px;width:auto"></h1>
+          <p style="margin:0;font-size:17px;line-height:1.5;color:#dfe3ea">Trazabilidad de materiales en obra</p>
+        </header>
+        <div style="padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <a href="mailto:empresastaller2026@gmail.com?subject=Contacto%20desde%20la%20tarjeta%20digital%20de%20Stok" style="grid-column:1/-1;min-height:54px;display:flex;align-items:center;justify-content:center;gap:10px;background:#ef8a3c;color:#0e1f38;font-weight:600;font-size:16px;text-decoration:none;border-radius:10px">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>Enviar correo</a>
+          <a href="https://www.stokchile.cl/#aku" target="_blank" rel="noopener noreferrer" style="min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid #0e1f38;color:#0e1f38;font-weight:500;font-size:15px;text-decoration:none;border-radius:10px" style-hover="background:#0e1f38;color:#f4f1ea">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a14 14 0 0 1 0 18"></path><path d="M12 3a14 14 0 0 0 0 18"></path></svg>Sitio web</a>
+          <a href="https://www.instagram.com/stok.cl/" target="_blank" rel="noopener noreferrer" style="min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid #0e1f38;color:#0e1f38;font-weight:500;font-size:15px;text-decoration:none;border-radius:10px" style-hover="background:#0e1f38;color:#f4f1ea">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle></svg>Instagram</a>
+          <button onClick="{{ saveContact }}" style="min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:#0e1f38;color:#f4f1ea;border:0;font:inherit;font-weight:500;font-size:15px;border-radius:10px;cursor:pointer">Guardar contacto</button>
+          <button onClick="{{ share }}" style="min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;color:#0e1f38;border:1.5px dashed #0e1f38;font:inherit;font-weight:500;font-size:15px;border-radius:10px;cursor:pointer">{{ shareLabel }}</button>
+        </div>
+        <div style="padding:6px 28px 24px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#a0561c">01 — Sobre nosotros</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <p style="margin:0;font-size:15px;line-height:1.65;color:#3b4658;text-wrap:pretty">Somos el equipo fundador de Stok. Queremos digitalizar las bodegas de la construcción, registrando de forma automática cada activo que entra y sale.</p>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-weight:700;font-size:15px;color:#0e1f38">¿Cómo lo hacemos?</span><p style="margin:0;font-size:15px;line-height:1.65;color:#3b4658;text-wrap:pretty">Etiquetamos cada activo con RFID según su tipo y usamos visión artificial para contar lo que entra y sale. El modelo aprende con el uso, así que su precisión mejora con el tiempo.</p></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-weight:700;font-size:15px;color:#0e1f38">¿Y la inteligencia artificial?</span><p style="margin:0;font-size:15px;line-height:1.65;color:#3b4658;text-wrap:pretty">Estamos desarrollando agentes de IA que prepararán por ustedes las órdenes de despacho y de compra, y que les dirán cuánto y cuándo comprar.</p></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-weight:700;font-size:15px;color:#0e1f38">¿Quién es dueño de los datos?</span><p style="margin:0;font-size:15px;line-height:1.65;color:#3b4658;text-wrap:pretty">Ustedes. Nuestro sistema es privado y seguro: la información se guarda cifrada como números, y solo ustedes la ven traducida. No usamos sus datos.</p></div>
+          </div>
+        </div>
+        <div style="padding:20px 28px 24px;border-top:1px solid #ddd6c8;display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#a0561c">02 — Nuestro equipo</div>
+          <sc-for list="{{ team }}" as="m" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:14px;padding-bottom:12px;border-bottom:1px dotted #c8bfae">
+              <img src="{{ m.photo }}" alt="{{ m.name }}" style="width:52px;height:52px;flex-shrink:0;object-fit:cover;object-position:50% 20%;border:1.5px solid #0e1f38">
+              <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+                <span style="font-weight:600;font-size:15px">{{ m.name }}</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5d6675">{{ m.role }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:20px 28px 26px;border-top:1px solid #ddd6c8;display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#a0561c">03 — Datos de Stok</div>
+          <button onClick="{{ copyEmail }}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:48px;padding:0 14px;background:#fff;border:1px solid #ddd6c8;border-radius:10px;font:inherit;color:#0e1f38;cursor:pointer;text-align:left">
+            <span style="font-size:14px;font-weight:500;overflow-wrap:anywhere">empresastaller2026@gmail.com</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#a0561c;white-space:nowrap">{{ copyLabel }}</span>
+          </button>
+          <div style="font-size:14px;color:#3b4658">Concepción, Chile</div>
+        </div>
+        <footer style="background:#0e1f38;color:#c9cfd9;padding:16px 28px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em">© {{ year }} Stok · Concepción, Chile</footer>
+      </article>
+    </div>
+
+    <!-- 1b -->
+    <div id="1b" style="display:flex;flex-direction:column;gap:14px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;background:#1c1b19;color:#fff;padding:4px 9px;border-radius:6px">1b</span>
+        <span style="font-size:14px;color:#3a3833">Alta visibilidad · Space Grotesk + JetBrains Mono</span>
+      </div>
+      <article style="background:#171717;border-radius:24px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.3);font-family:'Space Grotesk',sans-serif;color:#f2f0eb">
+        <header style="padding:30px 26px 28px;display:flex;flex-direction:column;gap:16px;border-bottom:8px solid #e9d43b">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#a8a49c">{{ greeting }}</span>
+          </div>
+          <h1 style="margin:0;align-self:flex-start"><img src="assets/logo-stok-claro.png" alt="Stok" style="display:block;height:68px;width:auto"></h1>
+          <p style="margin:0;font-size:18px;line-height:1.4;color:#d8d5cf">Trazabilidad de materiales en obra</p>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#e9d43b">Tarjeta de presentación digital</div>
+        </header>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:8px">
+          <a href="mailto:empresastaller2026@gmail.com?subject=Contacto%20desde%20la%20tarjeta%20digital%20de%20Stok" style="min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#e9d43b;color:#171717;font-weight:700;font-size:17px;text-decoration:none;border-radius:14px">Enviar correo<span style="font-family:'JetBrains Mono',monospace">→</span></a>
+          <a href="https://www.stokchile.cl/#aku" target="_blank" rel="noopener noreferrer" style="min-height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#242424;color:#f2f0eb;font-weight:500;font-size:16px;text-decoration:none;border-radius:14px" style-hover="background:#2f2f2f">Sitio web<span style="font-family:'JetBrains Mono',monospace;color:#a8a49c">↗</span></a>
+          <a href="https://www.instagram.com/stok.cl/" target="_blank" rel="noopener noreferrer" style="min-height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#242424;color:#f2f0eb;font-weight:500;font-size:16px;text-decoration:none;border-radius:14px" style-hover="background:#2f2f2f">Instagram<span style="font-family:'JetBrains Mono',monospace;color:#a8a49c">↗</span></a>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <button onClick="{{ saveContact }}" style="min-height:52px;background:transparent;color:#e9d43b;border:1.5px solid #e9d43b;border-radius:14px;font:inherit;font-weight:500;font-size:15px;cursor:pointer">Guardar contacto</button>
+            <button onClick="{{ share }}" style="min-height:52px;background:transparent;color:#f2f0eb;border:1.5px solid #4a4a4a;border-radius:14px;font:inherit;font-weight:500;font-size:15px;cursor:pointer">{{ shareLabel }}</button>
+          </div>
+        </div>
+        <div style="padding:14px 26px 22px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#a8a49c">Sobre nosotros</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <p style="margin:0;font-size:15px;line-height:1.6;color:#d8d5cf;text-wrap:pretty">Somos el equipo fundador de Stok. Queremos digitalizar las bodegas de la construcción, registrando de forma automática cada activo que entra y sale.</p>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-weight:700;font-size:15px;color:#e9d43b">¿Cómo lo hacemos?</span><p style="margin:0;font-size:15px;line-height:1.6;color:#d8d5cf;text-wrap:pretty">Etiquetamos cada activo con RFID según su tipo y usamos visión artificial para contar lo que entra y sale. El modelo aprende con el uso, así que su precisión mejora con el tiempo.</p></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-weight:700;font-size:15px;color:#e9d43b">¿Y la inteligencia artificial?</span><p style="margin:0;font-size:15px;line-height:1.6;color:#d8d5cf;text-wrap:pretty">Estamos desarrollando agentes de IA que prepararán por ustedes las órdenes de despacho y de compra, y que les dirán cuánto y cuándo comprar.</p></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-weight:700;font-size:15px;color:#e9d43b">¿Quién es dueño de los datos?</span><p style="margin:0;font-size:15px;line-height:1.6;color:#d8d5cf;text-wrap:pretty">Ustedes. Nuestro sistema es privado y seguro: la información se guarda cifrada como números, y solo ustedes la ven traducida. No usamos sus datos.</p></div>
+          </div>
+        </div>
+        <div style="padding:14px 26px 22px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#a8a49c">Nuestro equipo</div>
+          <sc-for list="{{ team }}" as="m" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:14px;padding:10px;background:#202020;border-radius:14px">
+              <img src="{{ m.photo }}" alt="{{ m.name }}" style="width:60px;height:60px;flex-shrink:0;object-fit:cover;object-position:50% 20%;border-radius:10px;filter:grayscale(1)">
+              <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                <span style="font-weight:700;font-size:16px">{{ m.name }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#a8a49c">{{ m.role }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:14px 26px 24px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#a8a49c">Datos de Stok</div>
+          <button onClick="{{ copyEmail }}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:50px;padding:0 14px;background:#202020;border:1px dashed #4a4a4a;border-radius:12px;font:inherit;color:#f2f0eb;cursor:pointer;text-align:left">
+            <span style="font-size:14px;overflow-wrap:anywhere">empresastaller2026@gmail.com</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#e9d43b;white-space:nowrap">{{ copyLabel }}</span>
+          </button>
+          <div style="font-size:14px;color:#d8d5cf;padding:4px 2px">Concepción, Chile</div>
+        </div>
+        <footer style="border-top:1px solid #2c2c2c;color:#8a867f;padding:16px 26px;font-family:'JetBrains Mono',monospace;font-size:11px">© {{ year }} Stok · Concepción, Chile</footer>
+      </article>
+    </div>
+
+    <!-- 1c -->
+    <div id="1c" style="display:flex;flex-direction:column;gap:14px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;background:#1c1b19;color:#fff;padding:4px 9px;border-radius:6px">1c</span>
+        <span style="font-size:14px;color:#3a3833">Editorial cálido · Instrument Serif + Manrope</span>
+      </div>
+      <article style="background:#f7f2ea;border-radius:24px;overflow:hidden;box-shadow:0 20px 50px rgba(60,35,20,.15);font-family:'Manrope',sans-serif;color:#2a1f1a">
+        <header style="padding:34px 28px 26px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+          
+          <div style="font-size:12px;font-weight:500;color:#7a6a5f">{{ greeting }} · Tarjeta de presentación digital</div>
+          <h1 style="margin:8px 0 4px"><img src="assets/logo-stok.png" alt="Stok" style="display:block;height:76px;width:auto"></h1>
+          <p style="margin:0;font-family:'Instrument Serif',serif;font-style:italic;font-size:22px;line-height:1.3;color:#5a4a40">Trazabilidad de materiales en obra</p>
+        </header>
+        <div style="padding:4px 22px 22px;display:flex;flex-direction:column;gap:10px">
+          <a href="mailto:empresastaller2026@gmail.com?subject=Contacto%20desde%20la%20tarjeta%20digital%20de%20Stok" style="min-height:54px;display:flex;align-items:center;justify-content:center;background:#b4553a;color:#fff;font-weight:700;font-size:16px;text-decoration:none;border-radius:999px">Enviar correo</a>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <a href="https://www.stokchile.cl/#aku" target="_blank" rel="noopener noreferrer" style="min-height:50px;display:flex;align-items:center;justify-content:center;background:#ece3d6;color:#2a1f1a;font-weight:500;font-size:15px;text-decoration:none;border-radius:999px" style-hover="background:#e3d6c4">Sitio web</a>
+            <a href="https://www.instagram.com/stok.cl/" target="_blank" rel="noopener noreferrer" style="min-height:50px;display:flex;align-items:center;justify-content:center;background:#ece3d6;color:#2a1f1a;font-weight:500;font-size:15px;text-decoration:none;border-radius:999px" style-hover="background:#e3d6c4">Instagram</a>
+            <button onClick="{{ saveContact }}" style="min-height:50px;background:transparent;color:#2a1f1a;border:1.5px solid #2a1f1a;border-radius:999px;font:inherit;font-weight:500;font-size:15px;cursor:pointer">Guardar contacto</button>
+            <button onClick="{{ share }}" style="min-height:50px;background:transparent;color:#2a1f1a;border:1.5px solid #cbbba8;border-radius:999px;font:inherit;font-weight:500;font-size:15px;cursor:pointer">{{ shareLabel }}</button>
+          </div>
+        </div>
+        <div style="margin:0 22px;padding:22px 6px;border-top:1px solid #e0d4c4;display:flex;flex-direction:column;gap:10px">
+          <h2 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:28px">Sobre nosotros</h2>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <p style="margin:0;font-size:15px;line-height:1.7;color:#5a4a40;text-wrap:pretty">Somos el equipo fundador de Stok. Queremos digitalizar las bodegas de la construcción, registrando de forma automática cada activo que entra y sale.</p>
+            <div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:'Instrument Serif',serif;font-style:italic;font-size:21px;color:#b4553a">¿Cómo lo hacemos?</span><p style="margin:0;font-size:15px;line-height:1.7;color:#5a4a40;text-wrap:pretty">Etiquetamos cada activo con RFID según su tipo y usamos visión artificial para contar lo que entra y sale. El modelo aprende con el uso, así que su precisión mejora con el tiempo.</p></div>
+            <div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:'Instrument Serif',serif;font-style:italic;font-size:21px;color:#b4553a">¿Y la inteligencia artificial?</span><p style="margin:0;font-size:15px;line-height:1.7;color:#5a4a40;text-wrap:pretty">Estamos desarrollando agentes de IA que prepararán por ustedes las órdenes de despacho y de compra, y que les dirán cuánto y cuándo comprar.</p></div>
+            <div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:'Instrument Serif',serif;font-style:italic;font-size:21px;color:#b4553a">¿Quién es dueño de los datos?</span><p style="margin:0;font-size:15px;line-height:1.7;color:#5a4a40;text-wrap:pretty">Ustedes. Nuestro sistema es privado y seguro: la información se guarda cifrada como números, y solo ustedes la ven traducida. No usamos sus datos.</p></div>
+          </div>
+        </div>
+        <div style="margin:0 22px;padding:22px 6px;border-top:1px solid #e0d4c4;display:flex;flex-direction:column;gap:12px">
+          <h2 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:28px">Nuestro equipo</h2>
+          <sc-for list="{{ team }}" as="m" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:14px">
+              <img src="{{ m.photo }}" alt="{{ m.name }}" style="width:60px;height:60px;flex-shrink:0;object-fit:cover;object-position:50% 20%;border-radius:50%">
+              <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                <span style="font-weight:700;font-size:16px">{{ m.name }}</span>
+                <span style="font-size:14px;color:#7a6a5f">{{ m.role }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="margin:0 22px;padding:22px 6px 26px;border-top:1px solid #e0d4c4;display:flex;flex-direction:column;gap:10px">
+          <h2 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:28px">Datos de Stok</h2>
+          <button onClick="{{ copyEmail }}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:48px;padding:0 16px;background:#fff;border:1px solid #e0d4c4;border-radius:14px;font:inherit;color:#2a1f1a;cursor:pointer;text-align:left">
+            <span style="font-size:14px;font-weight:500;overflow-wrap:anywhere">empresastaller2026@gmail.com</span>
+            <span style="font-size:12px;font-weight:700;color:#b4553a;white-space:nowrap">{{ copyLabel }}</span>
+          </button>
+          <div style="font-size:14px;color:#5a4a40">Concepción, Chile</div>
+        </div>
+        <footer style="background:#2a1f1a;color:#d9cbbb;padding:16px 28px;text-align:center;font-size:12px">© {{ year }} Stok · Concepción, Chile</footer>
+      </article>
+    </div>
+
+    <!-- 1d -->
+    <div id="1d" style="display:flex;flex-direction:column;gap:14px;width:390px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;background:#1c1b19;color:#fff;padding:4px 9px;border-radius:6px">1d</span>
+        <span style="font-size:14px;color:#3a3833">Bosque · Bricolage Grotesque + DM Mono</span>
+      </div>
+      <article style="background:#eef1ec;border-radius:24px;overflow:hidden;box-shadow:0 20px 50px rgba(15,42,34,.2);font-family:'Bricolage Grotesque',sans-serif;color:#13261f">
+        <header style="background:#123328;color:#eef1ec;padding:30px 26px 28px;display:flex;flex-direction:column;gap:12px;border-radius:0 0 28px 28px">
+          <div style="display:flex;gap:10px;align-items:center">
+            
+            <span style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;color:#a9c4b8">{{ greeting }} · Tarjeta de presentación digital</span>
+          </div>
+          <h1 style="margin:10px 0 0;align-self:flex-start"><img src="assets/logo-stok-claro.png" alt="Stok" style="display:block;height:66px;width:auto"></h1>
+          <p style="margin:0;font-size:18px;line-height:1.4;color:#cfe0d8">Trazabilidad de materiales en obra</p>
+        </header>
+        <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <a href="mailto:empresastaller2026@gmail.com?subject=Contacto%20desde%20la%20tarjeta%20digital%20de%20Stok" style="grid-column:1/-1;min-height:56px;display:flex;align-items:center;justify-content:center;gap:10px;background:#7fd6ae;color:#123328;font-weight:600;font-size:17px;text-decoration:none;border-radius:16px">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>Enviar correo</a>
+          <a href="https://www.stokchile.cl/#aku" target="_blank" rel="noopener noreferrer" style="min-height:76px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:12px 14px;background:#fff;color:#13261f;font-weight:600;font-size:15px;text-decoration:none;border-radius:16px" style-hover="background:#dfe9e3">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a14 14 0 0 1 0 18"></path><path d="M12 3a14 14 0 0 0 0 18"></path></svg>Sitio web</a>
+          <a href="https://www.instagram.com/stok.cl/" target="_blank" rel="noopener noreferrer" style="min-height:76px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:12px 14px;background:#fff;color:#13261f;font-weight:600;font-size:15px;text-decoration:none;border-radius:16px" style-hover="background:#dfe9e3">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle></svg>Instagram</a>
+          <button onClick="{{ saveContact }}" style="min-height:52px;background:#123328;color:#eef1ec;border:0;border-radius:16px;font:inherit;font-weight:600;font-size:15px;cursor:pointer">Guardar contacto</button>
+          <button onClick="{{ share }}" style="min-height:52px;background:transparent;color:#123328;border:1.5px solid #123328;border-radius:16px;font:inherit;font-weight:600;font-size:15px;cursor:pointer">{{ shareLabel }}</button>
+        </div>
+        <div style="padding:10px 26px 20px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'DM Mono',monospace;font-size:12px;color:#2f7a5b">/ sobre nosotros</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <p style="margin:0;font-size:16px;line-height:1.6;color:#3a4d45;text-wrap:pretty">Somos el equipo fundador de Stok. Queremos digitalizar las bodegas de la construcción, registrando de forma automática cada activo que entra y sale.</p>
+            <div style="display:flex;flex-direction:column;gap:4px;padding:14px;background:#fff;border-radius:14px"><span style="font-weight:700;font-size:16px;color:#13261f">¿Cómo lo hacemos?</span><p style="margin:0;font-size:15px;line-height:1.6;color:#3a4d45;text-wrap:pretty">Etiquetamos cada activo con RFID según su tipo y usamos visión artificial para contar lo que entra y sale. El modelo aprende con el uso, así que su precisión mejora con el tiempo.</p></div>
+            <div style="display:flex;flex-direction:column;gap:4px;padding:14px;background:#fff;border-radius:14px"><span style="font-weight:700;font-size:16px;color:#13261f">¿Y la inteligencia artificial?</span><p style="margin:0;font-size:15px;line-height:1.6;color:#3a4d45;text-wrap:pretty">Estamos desarrollando agentes de IA que prepararán por ustedes las órdenes de despacho y de compra, y que les dirán cuánto y cuándo comprar.</p></div>
+            <div style="display:flex;flex-direction:column;gap:4px;padding:14px;background:#fff;border-radius:14px"><span style="font-weight:700;font-size:16px;color:#13261f">¿Quién es dueño de los datos?</span><p style="margin:0;font-size:15px;line-height:1.6;color:#3a4d45;text-wrap:pretty">Ustedes. Nuestro sistema es privado y seguro: la información se guarda cifrada como números, y solo ustedes la ven traducida. No usamos sus datos.</p></div>
+          </div>
+        </div>
+        <div style="padding:10px 20px 20px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'DM Mono',monospace;font-size:12px;color:#2f7a5b;padding:0 6px">/ nuestro equipo</div>
+          <sc-for list="{{ team }}" as="m" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#fff;border-radius:14px">
+              <img src="{{ m.photo }}" alt="{{ m.name }}" style="width:56px;height:56px;flex-shrink:0;object-fit:cover;object-position:50% 20%;border-radius:12px;background:#d3ebdf">
+              <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+                <span style="font-weight:600;font-size:16px">{{ m.name }}</span>
+                <span style="font-family:'DM Mono',monospace;font-size:12px;color:#5b6e66">{{ m.role }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:10px 20px 24px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'DM Mono',monospace;font-size:12px;color:#2f7a5b;padding:0 6px">/ datos de stok</div>
+          <button onClick="{{ copyEmail }}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:50px;padding:0 14px;background:#fff;border:0;border-radius:14px;font:inherit;color:#13261f;cursor:pointer;text-align:left">
+            <span style="font-size:15px;font-weight:600;overflow-wrap:anywhere">empresastaller2026@gmail.com</span>
+            <span style="font-family:'DM Mono',monospace;font-size:11px;color:#2f7a5b;white-space:nowrap">{{ copyLabel }}</span>
+          </button>
+          <div style="font-size:15px;color:#3a4d45;padding:4px 6px">Concepción, Chile</div>
+        </div>
+        <footer style="background:#123328;color:#a9c4b8;padding:16px 26px;font-family:'DM Mono',monospace;font-size:11px">© {{ year }} Stok · Concepción, Chile</footer>
+      </article>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { copied: false, shared: false, copiedPhone: false, tab: 'nosotros', open: 0, toast: '' };
+  renderVals() {
+    const h = new Date().getHours();
+    const greeting = h >= 5 && h < 12 ? 'Buenos días' : h < 20 && h >= 12 ? 'Buenas tardes' : 'Buenas noches';
+    const team = [
+      ['Gustavo Fierro', 'Ingeniero civil en automatizacion'],
+      ['Joaquin Gonzáles', 'Ingeniero civil en construccion'],
+      ['Kevin Escobar', 'Ingeniero civil en construccion'],
+    ].map(([name, role], i) => ({ name, role, photo: `assets/equipo-${[2, 3, 1][i]}.jpeg`, initials: name.split(' ').map(w => w[0]).join('') }));
+    const faq = [
+      ['¿Cómo lo hacemos?', 'Etiquetamos cada activo con RFID según su tipo y usamos visión artificial para contar lo que entra y sale. El modelo aprende con el uso, así que su precisión mejora con el tiempo.'],
+      ['¿Y la inteligencia artificial?', 'Estamos desarrollando agentes de IA que prepararán por ustedes las órdenes de despacho y de compra, y que les dirán cuánto y cuándo comprar.'],
+      ['¿Quién es dueño de los datos?', 'Ustedes. Nuestro sistema es privado y seguro: la información se guarda cifrada como números, y solo ustedes la ven traducida. No usamos sus datos.'],
+    ].map(([q, a], i) => {
+      const open = this.state.open === i;
+      return { q, a, open, mark: open ? '−' : '+', bg: open ? '#ff6b1a' : '#f0f2fb', fg: '#0b1450', toggle: () => this.setState({ open: open ? -1 : i }) };
+    });
+    const tabs = [['nosotros', 'Nosotros'], ['equipo', 'Equipo'], ['contacto', 'Contacto']].map(([key, label]) => {
+      const on = this.state.tab === key;
+      return { key, label, bg: on ? '#0f1a5c' : 'transparent', fg: on ? '#ffffff' : '#0f1a5c', select: () => this.setState({ tab: key }) };
+    });
+    const tab3 = this.state.tab3 || 'nosotros';
+    const tabs3 = [['nosotros', 'Nosotros'], ['equipo', 'Equipo'], ['contacto', 'Contacto']].map(([key, label]) => {
+      const on = tab3 === key;
+      return { key, label, bg: on ? '#ff6b1a' : 'transparent', fg: on ? '#0b1450' : '#ffffff', select: () => this.setState({ tab3: key }) };
+    });
+    const stepData = [
+      ['Etiquetamos', 'Cada activo lleva su etiqueta RFID', 'Ponemos una etiqueta RFID en cada activo, elegida según el tipo de material o herramienta.'],
+      ['Contamos', 'La cámara cuenta lo que entra y sale', 'Con visión artificial contamos cuántos activos entran y salen de la bodega. El modelo aprende con el uso, así que su precisión mejora con el tiempo.'],
+      ['Automatizamos', 'La IA trabaja por ustedes', 'Estamos desarrollando agentes de IA que prepararán las órdenes de despacho y de compra, y que les dirán cuánto y cuándo comprar.'],
+    ];
+    const st = this.state.step || 0;
+    const steps = stepData.map(([short], i) => {
+      const on = i === st, done = i < st;
+      return { n: i + 1, short, bg: on ? '#ff6b1a' : done ? '#0b1450' : '#ffffff', fg: on ? '#0b1450' : done ? '#ffffff' : '#0b1450', ring: on ? '#ff6b1a' : '#0b1450', select: () => this.setState({ step: i }) };
+    });
+    return {
+      tabs3, steps,
+      tab3Nosotros: tab3 === 'nosotros', tab3Equipo: tab3 === 'equipo', tab3Contacto: tab3 === 'contacto',
+      stepTag: `Paso ${st + 1} de 3`, stepTitle: stepData[st][1], stepText: stepData[st][2],
+      nextLabel: st < 2 ? 'Siguiente →' : 'Volver al inicio',
+      nextStep: () => this.setState({ step: st < 2 ? st + 1 : 0 }),
+      faq, tabs,
+      tabNosotros: this.state.tab === 'nosotros', tabEquipo: this.state.tab === 'equipo', tabContacto: this.state.tab === 'contacto',
+      toastOn: !!this.state.toast, toastMsg: this.state.toast,
+      phoneLabel: this.state.copiedPhone ? 'Copiado' : 'Copiar',
+      copyPhone: () => this.copy('+56941680798', 'copiedPhone'),
+      greeting, team, year: new Date().getFullYear(),
+      copyLabel: this.state.copied ? 'Copiado' : 'Copiar',
+      shareLabel: this.state.shared ? 'Enlace copiado' : 'Compartir',
+      copyEmail: () => this.copy('empresastaller2026@gmail.com', 'copied'),
+      share: () => {
+        const url = location.href.split('#')[0];
+        if (navigator.share) navigator.share({ title: 'Stok', text: 'Trazabilidad de materiales en obra', url }).catch(() => {});
+        else this.copy(url, 'shared');
+      },
+      saveContact: () => {
+        const vcf = ['BEGIN:VCARD','VERSION:3.0','FN;CHARSET=UTF-8:Stok','N;CHARSET=UTF-8:;Stok;;;','ORG;CHARSET=UTF-8:Stok','TITLE;CHARSET=UTF-8:Soluciones de trazabilidad de materiales','EMAIL;TYPE=INTERNET,WORK:empresastaller2026@gmail.com','URL;TYPE=WORK:https://www.stokchile.cl/','ADR;TYPE=WORK;CHARSET=UTF-8:;;;Concepción;;;Chile','NOTE;CHARSET=UTF-8:Soluciones para mejorar la trazabilidad de materiales en obras mediante tecnología RFID e inteligencia artificial.','TEL;TYPE=CELL:+56941680798','END:VCARD'].join('\r\n');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([vcf], { type: 'text/vcard;charset=utf-8' }));
+        a.download = 'Stok.vcf'; a.click();
+        this.flash('Contacto descargado');
+      },
+    };
+  }
+  flash(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this.tToast);
+    this.tToast = setTimeout(() => this.setState({ toast: '' }), 2000);
+  }
+  copy(text, key) {
+    navigator.clipboard?.writeText(text).catch(() => {});
+    this.setState({ [key]: true });
+    this.flash(key === 'shared' ? 'Enlace copiado' : key === 'copiedPhone' ? 'Teléfono copiado' : 'Correo copiado');
+    clearTimeout(this['t' + key]);
+    this['t' + key] = setTimeout(() => this.setState({ [key]: false }), 1800);
+  }
+}
+</script>
+</body>
+</html>
